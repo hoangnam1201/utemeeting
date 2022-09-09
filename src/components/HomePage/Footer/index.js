@@ -1,9 +1,11 @@
-import { Container, Grid, Link } from "@material-ui/core";
+import Container from "@material-ui/core/Container";
+import Grid from "@material-ui/core/Grid";
+import Link from "@material-ui/core/Link";
 import React from "react";
 import Logo from "../../../assets/logomeeting.png";
-import PhoneIcon from "@material-ui/icons/Phone";
-import EmailIcon from "@material-ui/icons/Email";
-import { makeStyles } from "@material-ui/core/styles";
+import PhoneIcon from "@mui/icons-material/Phone";
+import EmailIcon from "@mui/icons-material/Email";
+import makeStyles from "@material-ui/core/styles/makeStyles";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 const useStyles = makeStyles((theme) => ({
@@ -49,7 +51,7 @@ export default function Footer() {
   const classes = useStyles();
   return (
     <>
-      <div className={classes.root}>
+      <div className={classes.root} id="contact">
         <Container className={classes.container}>
           <Grid container spacing={4} className={classes.grid}>
             <Grid item xs={12} sm={2} className={classes.infoList}>

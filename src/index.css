@@ -6,6 +6,7 @@ body {
     font-family: "Roboto", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    padding-right: 0 !important ;
 }
 
 code {
@@ -26,14 +27,29 @@ code {
           text-shadow: none;
         }
     } 
-    .croll-none::-webkit-scrollbar {
+    .scroll-none::-webkit-scrollbar {
       width: 0;
       height: 0;
     }
 
+    .scroll-sm::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .scroll-sm::-webkit-scrollbar-track {
+      background: #d1d5db;
+      border-radius: 20px;
+    }
+
+    .scroll-sm::-webkit-scrollbar-thumb {
+      background: #6b7280;
+      border-radius: 20px;
+    }
+
     body::-webkit-scrollbar {
-      width: 15px;
-      height: 10px;
+      width: 6px;
+      height: 6px;
     }
   
     body::-webkit-scrollbar-track {

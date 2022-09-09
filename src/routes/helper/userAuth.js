@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useCookies } from 'react-cookie'
 import { Route } from 'react-router';
 import SigninToContinue from './../../components/SigninToContinute'

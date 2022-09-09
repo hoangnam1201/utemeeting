@@ -2,7 +2,8 @@ import React from "react";
 import { Route, Switch, NavLink, Redirect } from "react-router-dom";
 import ChangePassword from "./changepassword";
 import Profiles from "./profile";
-import { makeStyles, Container } from "@material-ui/core";
+import { Container } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles({
   root: {
@@ -62,8 +63,14 @@ const Profile = () => {
       </nav>
       <Switch>
         <Route path="/user/profile/change-profile" component={Profiles} />
-        <Route path="/user/profile/change-password" component={ChangePassword} />
-        <Route path="/" render={() => <Redirect to='/user/profile/change-profile' />} />
+        <Route
+          path="/user/profile/change-password"
+          component={ChangePassword}
+        />
+        <Route
+          path="/"
+          render={() => <Redirect to="/user/profile/change-profile" />}
+        />
       </Switch>
     </div>
   );

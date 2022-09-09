@@ -1,15 +1,16 @@
 import React, { useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { TextField, Box, Button, Container } from "@material-ui/core";
+import { makeStyles } from "@mui/styles";
+import { Box, TextField, Button, Container, Alert } from "@mui/material";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { ScaleLoader } from "react-spinners";
-import axios from "axios";
 import Swal from "sweetalert2";
 import { Helmet } from "react-helmet";
+import { useCookies } from "react-cookie";
+import { changePasswordAPI } from "../../api/user.api";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: { marginBottom: "100px", padding: "0 100px" },
   loaderRoot: {
     opacity: 0.5,
@@ -39,7 +40,10 @@ const useStyles = makeStyles((theme) => ({
 const schema = yup.object().shape({
   oldPassword: yup.string().required("Vui lòng nhập lại password cũ !"),
   password: yup.string().required("Vui lòng nhập password mới !"),
-  passwordConfirmation: yup.string().required("Vui lòng nhập lại password !"),
+  passwordConfirmation: yup
+    .string()
+    .required("Vui lòng nhập lại password !")
+    .oneOf([yup.ref("password")], "Mật khẩu không khớp !"),
 });
 
 export default function ChangePassword() {
@@ -52,7 +56,8 @@ export default function ChangePassword() {
     ? JSON.parse(localStorage.getItem("user"))
     : "";
   const [loading, setLoading] = useState(false);
-
+  const [errorNotify, setErrorNotify] = useState(null);
+  const [cookies] = useCookies(["u_auth"]);
   const [password, setPassword] = useState({
     oldPassword: "",
     password: "",
@@ -71,18 +76,13 @@ export default function ChangePassword() {
 
   const onPasswordSubmit = () => {
     setLoading(true);
-    axios({
-      url: `http://ec2-54-161-198-205.compute-1.amazonaws.com:3002/api/user/change-password`,
-      method: "PUT",
-      data: {
-        oldPassword: password.oldPassword,
-        password: password.password,
-        passwordConfirmation: password.passwordConfirmation,
-      },
-      headers: {
-        Authorization: `token ${accessToken.accessToken}`,
-      },
-    })
+
+    const data = {
+      oldPassword: password.oldPassword,
+      password: password.password,
+      passwordConfirmation: password.passwordConfirmation,
+    };
+    changePasswordAPI(data)
       .then(() => {
         setLoading(false);
         Swal.fire({
@@ -93,7 +93,16 @@ export default function ChangePassword() {
         });
       })
       .catch((error) => {
-        console.log(error);
+        setLoading(false);
+        if (error?.response?.data?.msg) {
+          setErrorNotify(error?.response?.data?.msg);
+        }
+        if (error?.response?.data?.errors[0].msg) {
+          setErrorNotify(error?.response?.data?.errors[0].msg);
+        }
+        if (error?.response?.data?.err) {
+          setErrorNotify(error?.response?.data?.err);
+        }
       });
   };
   return (
@@ -173,6 +182,11 @@ export default function ChangePassword() {
             value={password.passwordConfirmation}
             onChange={handleInfoChange}
           />
+          {errorNotify ? (
+            <Alert style={{ marginTop: "15px" }} severity="error">
+              {errorNotify}
+            </Alert>
+          ) : null}
           <Button
             type="submit"
             variant="contained"

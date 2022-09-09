@@ -1,6 +1,5 @@
 import React from "react";
-import { Box, Container, Typography, makeStyles } from "@material-ui/core";
-// import Page from "../../components/Page";
+import { makeStyles } from "@mui/styles";
 import errorImage from "../../assets/undraw_page_not_found_su7k.svg";
 import { Link } from "react-router-dom";
 
@@ -46,18 +45,18 @@ const Error = ({ type }) => {
 
   return (
     <div className="p-4">
-      <img
-        alt="Under development"
-        className={classes.image}
-        src={errorImage}
-      />
+      <img alt="Under development" className={classes.image} src={errorImage} />
       <div className="text-xl font-medium text-gray-500">
         The page you are looking for isn’t here
       </div>
-      {type === 0 && <div className='py-2 px-4 bg-gray-100 rounded-md w-40 ml-auto mr-auto shadow-lg mt-4
-      text-gray-500 hover:bg-gray-200'>
-        <Link to="/" >Go Back Home</Link>
-      </div>}
+      {type === 0 && (
+        <div
+          className="py-2 px-4 bg-gray-100 rounded-md w-40 ml-auto mr-auto shadow-lg mt-4
+      text-gray-500 hover:bg-gray-200"
+        >
+          <Link to="/">Go Back Home</Link>
+        </div>
+      )}
     </div>
   );
 };

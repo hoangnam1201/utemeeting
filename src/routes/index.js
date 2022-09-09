@@ -3,11 +3,11 @@ import Login from "../components/Auth/Login";
 import Register from "../components/Auth/Register";
 import Profile from "../components/Profile/index";
 import MyEvent from "../components/MyEvent";
-import RoomDetail from "../components/RoomDetail";
-import CheckMedia from "../components/CheckMedia";
-import Presentation from "../components/Present";
 import UpdateEvent from "../components/updateEvent";
 import RoomCall from "../components/roomCall";
+import GroupManagement from "../components/groupManagement";
+import RecordPreview from "../components/RecordPreview";
+import TableManagement from "../components/tableManagement";
 
 export const userRoute = [
   {
@@ -25,20 +25,25 @@ export const userRoute = [
     path: "/user/update-event/:id",
     component: UpdateEvent,
   },
+  { exact: true, path: "/user/record-preview", component: RecordPreview },
 ];
 
 export const roomRoute = [
   {
     exact: true,
-    path: "/room/id/:id",
+    path: "/room/groups/:roomId",
+    component: GroupManagement,
+  },
+  {
+    exact: true,
+    path: "/room/:id",
     component: RoomCall,
   },
   {
     exact: true,
-    path: "/room/check-media",
-    component: CheckMedia,
+    path: "/room/tables/:id",
+    component: TableManagement,
   },
-  { exact: true, path: "/room/present", component: Presentation },
 ];
 
 export const authRoute = [

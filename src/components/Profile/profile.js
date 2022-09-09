@@ -1,23 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { TextField, Box, Button, Container } from "@material-ui/core";
+import { makeStyles } from "@mui/styles";
+import { TextField, Box, Button, Container, Alert } from "@mui/material";
+
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { ScaleLoader } from "react-spinners";
-import axios from "axios";
 import Swal from "sweetalert2";
-import {
-  KeyboardDatePicker,
-  MuiPickersUtilsProvider,
-} from "@material-ui/pickers";
+import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
+import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DateFnsUtils from "@date-io/date-fns";
 import moment from "moment";
 import { Helmet } from "react-helmet";
 import { useSelector } from "react-redux";
-import { useCookies } from "react-cookie";
+import { changeUserInfoAPI } from "../../api/user.api";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: { marginBottom: "100px", padding: "0 100px" },
   loaderRoot: {
     opacity: 0.5,
@@ -32,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
   },
   tabRoot: {
     flexGrow: 1,
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: "white",
     display: "flex",
     height: 224,
     width: "100%",
@@ -40,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: 100,
   },
   tabs: {
-    borderRight: `1px solid ${theme.palette.divider}`,
+    borderRight: `1px solid black`,
   },
   button: {
     marginTop: 10,
@@ -65,10 +63,12 @@ const useStyles = makeStyles((theme) => ({
 const phoneRegExp =
   /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
 const schema = yup.object().shape({
-  name: yup.string().required("Name đang trống !"),
+  name: yup.string().min(5).required("Name đang trống !"),
   phone: yup
     .string()
     .required("Số điện thoại đang trống !")
+    .min(9, "Số điện thoại ít nhất 9 ký tự")
+    .max(12, "Số điện thoại tối đa 12 ký tự")
     .matches(phoneRegExp, "Số điện thoại không đúng định dạng !"),
 });
 
@@ -78,8 +78,7 @@ export default function Profiles() {
     resolver: yupResolver(schema),
   });
   const classes = useStyles();
-  const loginInfo = useSelector(state => state.userReducer?.user);
-  const [cookies] = useCookies(['u_auth']);
+  const loginInfo = useSelector((state) => state.userReducer?.user);
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [info, setInfo] = useState(null);
@@ -112,16 +111,7 @@ export default function Profiles() {
       phone: info.phone,
     };
     setLoading(true);
-    axios
-      .put(
-        "http://ec2-54-161-198-205.compute-1.amazonaws.com:3002/api/user/change-infor",
-        data,
-        {
-          headers: {
-            Authorization: `token ${cookies.u_auth.accessToken}`,
-          }
-        },
-      )
+    changeUserInfoAPI(data)
       .then((res) => {
         setLoading(false);
         setErrorNotify(null);
@@ -131,15 +121,20 @@ export default function Profiles() {
           timer: 1500,
           showConfirmButton: false,
         });
-        loginInfo.name = res.data.data.name;
-        loginInfo.dob = res.data.data.dob;
-        loginInfo.phone = res.data.data.phone;
-        localStorage.setItem("loginInfo", JSON.stringify(loginInfo));
+        loginInfo.name = res.data.name;
+        loginInfo.dob = res.data.dob;
+        loginInfo.phone = res.data.phone;
       })
       .catch((error) => {
         setLoading(false);
-        if (error.response.data && error.response) {
-          setErrorNotify(error.response.data);
+        if (error?.response?.data?.msg) {
+          setErrorNotify(error?.response?.data?.msg);
+        }
+        if (error?.response?.data?.errors[0].msg) {
+          setErrorNotify(error?.response?.data?.errors[0].msg);
+        }
+        if (error?.response?.data?.err) {
+          setErrorNotify(error?.response?.data?.err);
         }
       });
   };
@@ -170,6 +165,7 @@ export default function Profiles() {
           onSubmit={handleSubmit(onInfoSubmit)}
         >
           <TextField
+            focused
             className={classes.input}
             variant="outlined"
             margin="dense"
@@ -178,14 +174,11 @@ export default function Profiles() {
             id="username"
             label="Username"
             name="username"
-            autoComplete="username"
-            inputRef={register}
-            error={!!errors.username}
-            helperText={errors?.username?.message}
+            disabled
             value={info?.username}
-            onChange={handleInfoChange}
           />
           <TextField
+            focused
             className={classes.input}
             variant="outlined"
             margin="dense"
@@ -202,6 +195,7 @@ export default function Profiles() {
             onChange={handleInfoChange}
           />
           <TextField
+            focused
             className={classes.input}
             variant="outlined"
             margin="dense"
@@ -218,6 +212,7 @@ export default function Profiles() {
             onChange={handleInfoChange}
           />
           <TextField
+            focused
             className={classes.input}
             variant="outlined"
             margin="dense"
@@ -226,30 +221,30 @@ export default function Profiles() {
             id="email"
             label="Email"
             name="email"
-            autoComplete="email"
-            inputRef={register}
-            error={!!errors.email}
-            helperText={errors?.email?.message}
+            disabled
             value={info?.email}
-            onChange={handleInfoChange}
           />
-          <MuiPickersUtilsProvider
+          <LocalizationProvider
             className={classes.input}
-            utils={DateFnsUtils}
+            dateAdapter={DateFnsUtils}
           >
-            <KeyboardDatePicker
+            <DesktopDatePicker
               margin="dense"
               id="date-picker-dialog-register"
               label="Ngày tháng năm sinh"
-              format="MM/dd/yyyy"
+              inputFormat="MM/dd/yyyy"
               name="dob"
               value={selectedDate}
               onChange={handleDateChange}
               className={classes.datePicker}
             />
-          </MuiPickersUtilsProvider>
+          </LocalizationProvider>
 
-          {errorNotify ? <h5>{errorNotify}</h5> : null}
+          {errorNotify ? (
+            <Alert style={{ marginTop: "15px" }} severity="error">
+              {errorNotify}
+            </Alert>
+          ) : null}
           <Button
             type="submit"
             variant="contained"

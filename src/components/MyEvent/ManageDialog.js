@@ -1,33 +1,35 @@
 import React, { useEffect, useState } from "react";
-import { makeStyles, withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import MuiDialogContent from "@material-ui/core/DialogContent";
-import MuiDialogActions from "@material-ui/core/DialogActions";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
-import Grid from "@material-ui/core/Grid";
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  TextField,
+  Grid,
+  Alert,
+  Typography,
+} from "@mui/material";
+import { withStyles, makeStyles } from "@mui/styles";
+
+import CloseIcon from "@mui/icons-material/Close";
+
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
-import {
-  KeyboardDatePicker,
-  MuiPickersUtilsProvider,
-} from "@material-ui/pickers";
-import DateFnsUtils from "@date-io/date-fns";
-import axios from "axios";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { actGetRoom } from "./modules/action";
 import { useCookies } from "react-cookie";
-import Alert from "@material-ui/lab/Alert";
+import { createRoomApi, updateRoomApi } from "../../api/room.api";
 const useStyles = makeStyles((theme) => ({
   form: {
     width: "100%",
-    marginTop: theme.spacing(1),
+    marginTop: "10px",
   },
   formControl: {
     width: "100%",
@@ -39,23 +41,21 @@ const useStyles = makeStyles((theme) => ({
 const styles = (theme) => ({
   root: {
     margin: 0,
-    padding: theme.spacing(2),
+    padding: "20px",
   },
   closeButton: {
     position: "absolute",
-    right: theme.spacing(1),
-    top: theme.spacing(1),
+    left: "360px",
+    bottom: "40px",
     color: "red",
   },
 });
-const DialogTitle = withStyles(styles)((props) => {
+const DialogTitleMui = withStyles(styles)((props) => {
   const { children, classes, onClose, ...other } = props;
   return (
-    <MuiDialogTitle disableTypography className={classes.root} {...other}>
-      <Typography color="secondary" variant="h6" align="center">
-        {children}
-      </Typography>
-      {onClose ? (
+    <DialogTitle className={classes.root} {...other}>
+      <h6>{children}</h6>
+      {/* {onClose ? (
         <IconButton
           aria-label="close"
           className={classes.closeButton}
@@ -63,23 +63,23 @@ const DialogTitle = withStyles(styles)((props) => {
         >
           <CloseIcon />
         </IconButton>
-      ) : null}
-    </MuiDialogTitle>
+      ) : null} */}
+    </DialogTitle>
   );
 });
 
-const DialogContent = withStyles((theme) => ({
+const DialogContentMui = withStyles(() => ({
   root: {
-    padding: theme.spacing(2),
+    padding: "20px",
   },
-}))(MuiDialogContent);
+}))(DialogContent);
 
-const DialogActions = withStyles((theme) => ({
+const DialogActionsMui = withStyles(() => ({
   root: {
     margin: 0,
-    padding: theme.spacing(1),
+    padding: "20px",
   },
-}))(MuiDialogActions);
+}))(DialogActions);
 const schema = yup.object().shape({
   name: yup.string().required("Vui lòng nhập tên!!"),
   description: yup.string().required("Vui lòng nhập mô tả !!!"),
@@ -117,21 +117,13 @@ const ManageDialog = (props) => {
     setEndDate(date.getTime());
   };
   const onAddSubmit = () => {
-    // data["startDate"] = moment(startDate).format("yyyy-MM-DD");
-    // data["endDate"] = moment(endDate).format("yyyy-MM-DD");
-    axios({
-      url: `http://ec2-54-161-198-205.compute-1.amazonaws.com:3002/api/room`,
-      method: "POST",
-      data: {
-        name: roomEvent.name,
-        description: roomEvent.description,
-        startDate: startDate,
-        endDate: endDate,
-      },
-      headers: {
-        Authorization: `token ${cookies.u_auth.accessToken}`,
-      },
-    })
+    const data = {
+      name: roomEvent.name,
+      description: roomEvent.description,
+      startDate: startDate,
+      endDate: endDate,
+    };
+    createRoomApi(data)
       .then(() => {
         setOpenDialog(false);
         Swal.fire({
@@ -158,19 +150,13 @@ const ManageDialog = (props) => {
       });
   };
   const onUpdateSubmit = () => {
-    axios({
-      url: `http://ec2-54-161-198-205.compute-1.amazonaws.com:3002/api/room/${roomEvent._id}`,
-      method: "PUT",
-      data: {
-        name: roomEvent.name,
-        description: roomEvent.description,
-        startDate: startDate,
-        endDate: endDate,
-      },
-      headers: {
-        Authorization: `token ${cookies.u_auth.accessToken}`,
-      },
-    })
+    const data = {
+      name: roomEvent.name,
+      description: roomEvent.description,
+      startDate: startDate,
+      endDate: endDate,
+    };
+    updateRoomApi(roomEvent._id, data)
       .then(() => {
         setOpenDialog(false);
         Swal.fire({
@@ -190,8 +176,8 @@ const ManageDialog = (props) => {
   return (
     <div>
       <Dialog maxWidth="xs" onClose={handleCloseDialog} open={openDialog}>
-        <DialogTitle onClose={handleCloseDialog}>{modal.title}</DialogTitle>
-        <DialogContent dividers>
+        <DialogTitleMui>{modal.title}</DialogTitleMui>
+        <DialogContentMui dividers>
           <form className={classes.form} noValidate>
             <Grid container spacing={2}>
               <Grid item xs={12}>
@@ -230,37 +216,43 @@ const ManageDialog = (props) => {
               </Grid>
 
               <Grid item xs={12}>
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                  <KeyboardDatePicker
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DesktopDatePicker
                     margin="dense"
                     id="date-picker-dialog-register"
                     label="Ngày bắt đầu"
-                    format="MM/dd/yyyy"
+                    inputFormat="MM/dd/yyyy"
                     name="startDate"
                     value={new Date(startDate)}
                     onChange={handleDateChange}
                     className={classes.datePicker}
+                    renderInput={(params) => (
+                      <TextField className="my-2" fullWidth {...params} />
+                    )}
                   />
-                </MuiPickersUtilsProvider>
+                </LocalizationProvider>
               </Grid>
               <Grid item xs={12}>
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                  <KeyboardDatePicker
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DesktopDatePicker
                     margin="dense"
                     id="date-picker-dialog-register2"
                     label="Ngày kết thúc"
-                    format="MM/dd/yyyy"
+                    inputFormat="MM/dd/yyyy"
                     name="endDate"
                     value={new Date(endDate)}
                     onChange={handleDateChange2}
                     className={classes.datePicker}
+                    renderInput={(params) => (
+                      <TextField className="my-2" fullWidth {...params} />
+                    )}
                   />
-                </MuiPickersUtilsProvider>
+                </LocalizationProvider>
               </Grid>
             </Grid>
           </form>
-        </DialogContent>
-        <DialogActions>
+        </DialogContentMui>
+        <DialogActionsMui>
           {roomError ? (
             <Alert style={{ marginTop: "15px" }} severity="error">
               {roomError}
@@ -279,7 +271,7 @@ const ManageDialog = (props) => {
           >
             {modal.button}
           </Button>
-        </DialogActions>
+        </DialogActionsMui>
       </Dialog>
     </div>
   );
