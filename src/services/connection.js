@@ -13,9 +13,8 @@ var soundJoin = new Audio(sound);
 var soundMessage = new Audio(sound1);
 
 const peerEndPoint = {
-  host: "localhost",
+  host: process.env.REACT_APP_HOST_BASE,
   path: "/peerjs/meeting",
-  port: 3002,
 };
 const socketRoomEndPoint = process.env.REACT_APP_HOST_BASE + "/socket/rooms";
 const cookies = new Cookies();
