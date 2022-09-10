@@ -17,7 +17,7 @@ const peerEndPoint = {
   path: "/peerjs/meeting",
   port: 3002,
 };
-const socketRoomEndPoint = "http://localhost:3002/socket/rooms";
+const socketRoomEndPoint = process.env.REACT_APP_HOST_BASE + "/socket/rooms";
 const cookies = new Cookies();
 
 const initializePeerConnection = () => {
