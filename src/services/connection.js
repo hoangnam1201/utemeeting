@@ -13,7 +13,7 @@ var soundJoin = new Audio(sound);
 var soundMessage = new Audio(sound1);
 
 const peerEndPoint = {
-  host: process.env.REACT_APP_HOST_BASE,
+  host: process.env.REACT_APP_BE_DOMAIN,
   path: "/peerjs/meeting",
   port: 80
 };
