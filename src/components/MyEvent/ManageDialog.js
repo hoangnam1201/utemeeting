@@ -181,10 +181,10 @@ const ManageDialog = (props) => {
   return (
     <>
       <div>
-        <div className={`${loading ? "visible" : "invisible"}`}>
-          <LinearProgress />
-        </div>
         <Dialog maxWidth="xs" onClose={handleCloseDialog} open={openDialog}>
+          <div className={`${loading ? "visible" : "invisible"}`}>
+            <LinearProgress />
+          </div>
           <DialogTitleMui>{modal.title}</DialogTitleMui>
           <DialogContentMui dividers>
             <form className={classes.form} noValidate>
