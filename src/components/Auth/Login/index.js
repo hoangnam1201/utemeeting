@@ -30,7 +30,6 @@ import { googleLoginAPI, loginAPI } from "../../../api/user.api";
 import imgLogo from "../../../assets/logomeeting.png";
 import { useDispatch } from "react-redux";
 import { actionRemoveUserInfo } from "../../../store/actions/userInfoAction";
-import { LoadingButton } from "@mui/lab";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -255,7 +254,17 @@ function Login(props) {
         <title>Đăng nhập</title>
         <meta charSet="utf-8" name="description" content="Trang chủ" />
       </Helmet>
-      <div className={classes.root}>
+      <Box className={classes.loaderBox}>
+        <ScaleLoader
+          color="#f50057"
+          loading={loading}
+          height={45}
+          width={5}
+          radius={10}
+          margin={4}
+        />
+      </Box>
+      <div className={`${classes.root} ${loading ? classes.loaderRoot : null}`}>
         <img alt="bg" src={AuthBackground} className={classes.backImg} />
         <Container
           className={`${classes.containerMobile} ${
@@ -266,6 +275,7 @@ function Login(props) {
         >
           <CssBaseline />
           <div className={classes.paper}>
+            {/* <Avatar src={LogoMeeting} className={classes.avatar}></Avatar> */}
             <img src={imgLogo} alt="" height={300} width={300} />
             <Typography component="h4" variant="h4" className="my-6">
               Đăng Nhập
@@ -337,16 +347,15 @@ function Login(props) {
                   {loginError}
                 </Alert>
               ) : null}
-              <LoadingButton
+              <Button
                 type="submit"
                 fullWidth
-                loading={loading}
                 variant="contained"
                 color="primary"
                 className={classes.submit}
               >
                 Đăng Nhập
-              </LoadingButton>
+              </Button>
               <Grid container justifyContent="space-between">
                 <Grid item>
                   <Link
@@ -375,6 +384,7 @@ function Login(props) {
               <h2 className="font-bold mt-3 border-b-2 border-black w-40">
                 Or
               </h2>
+
               <div id="googleLogin"></div>
             </div>
           </div>

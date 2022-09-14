@@ -5,16 +5,14 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  IconButton,
   TextField,
   Grid,
   Alert,
   Typography,
+  Box,
 } from "@mui/material";
 import { withStyles, makeStyles } from "@mui/styles";
-
-import CloseIcon from "@mui/icons-material/Close";
-
+import { ScaleLoader } from "react-spinners";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
@@ -26,6 +24,7 @@ import { useDispatch } from "react-redux";
 import { actGetRoom } from "./modules/action";
 import { useCookies } from "react-cookie";
 import { createRoomApi, updateRoomApi } from "../../api/room.api";
+
 const useStyles = makeStyles((theme) => ({
   form: {
     width: "100%",
@@ -93,6 +92,7 @@ const ManageDialog = (props) => {
   const [startDate, setStartData] = useState(Date.now());
   const [endDate, setEndDate] = useState(Date.now());
   const [roomError, setRoomError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const { register, handleSubmit, errors } = useForm({
     mode: "onBlur",
     resolver: yupResolver(schema),
@@ -117,6 +117,7 @@ const ManageDialog = (props) => {
     setEndDate(date.getTime());
   };
   const onAddSubmit = () => {
+    setLoading(true);
     const data = {
       name: roomEvent.name,
       description: roomEvent.description,
@@ -125,6 +126,7 @@ const ManageDialog = (props) => {
     };
     createRoomApi(data)
       .then(() => {
+        setLoading(false);
         setOpenDialog(false);
         Swal.fire({
           icon: "success",
@@ -136,6 +138,7 @@ const ManageDialog = (props) => {
         });
       })
       .catch((error) => {
+        setLoading(false);
         console.log(error.response);
         // setOpenDialog(false);
         if (error?.response?.data?.msg) {
@@ -150,6 +153,7 @@ const ManageDialog = (props) => {
       });
   };
   const onUpdateSubmit = () => {
+    setLoading(true);
     const data = {
       name: roomEvent.name,
       description: roomEvent.description,
@@ -158,6 +162,7 @@ const ManageDialog = (props) => {
     };
     updateRoomApi(roomEvent._id, data)
       .then(() => {
+        setLoading(false);
         setOpenDialog(false);
         Swal.fire({
           icon: "success",
@@ -169,111 +174,124 @@ const ManageDialog = (props) => {
         });
       })
       .catch((error) => {
+        setLoading(false);
         setOpenDialog(false);
       });
   };
 
   return (
-    <div>
-      <Dialog maxWidth="xs" onClose={handleCloseDialog} open={openDialog}>
-        <DialogTitleMui>{modal.title}</DialogTitleMui>
-        <DialogContentMui dividers>
-          <form className={classes.form} noValidate>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  margin="dense"
-                  required
-                  fullWidth
-                  id="name"
-                  label="Tên phòng"
-                  name="name"
-                  autoComplete="name"
-                  inputRef={register}
-                  error={!!errors.name}
-                  helperText={errors?.name?.message}
-                  value={roomEvent.name}
-                  onChange={handleChange}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  margin="dense"
-                  required
-                  fullWidth
-                  id="description"
-                  label="Mô tả"
-                  name="description"
-                  autoComplete="description"
-                  inputRef={register}
-                  error={!!errors.description}
-                  helperText={errors?.description?.message}
-                  value={roomEvent.description}
-                  onChange={handleChange}
-                />
-              </Grid>
+    <>
+      <Box className="z-100 inline-block fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <ScaleLoader
+          color="#f50057"
+          loading={loading}
+          height={45}
+          width={5}
+          radius={10}
+          margin={4}
+        />
+      </Box>
+      <div className={`${loading ? `opacity-50` : null}`}>
+        <Dialog maxWidth="xs" onClose={handleCloseDialog} open={openDialog}>
+          <DialogTitleMui>{modal.title}</DialogTitleMui>
+          <DialogContentMui dividers>
+            <form className={classes.form} noValidate>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField
+                    variant="outlined"
+                    margin="dense"
+                    required
+                    fullWidth
+                    id="name"
+                    label="Tên phòng"
+                    name="name"
+                    autoComplete="name"
+                    inputRef={register}
+                    error={!!errors.name}
+                    helperText={errors?.name?.message}
+                    value={roomEvent.name}
+                    onChange={handleChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    variant="outlined"
+                    margin="dense"
+                    required
+                    fullWidth
+                    id="description"
+                    label="Mô tả"
+                    name="description"
+                    autoComplete="description"
+                    inputRef={register}
+                    error={!!errors.description}
+                    helperText={errors?.description?.message}
+                    value={roomEvent.description}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
-              <Grid item xs={12}>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <DesktopDatePicker
-                    margin="dense"
-                    id="date-picker-dialog-register"
-                    label="Ngày bắt đầu"
-                    inputFormat="MM/dd/yyyy"
-                    name="startDate"
-                    value={new Date(startDate)}
-                    onChange={handleDateChange}
-                    className={classes.datePicker}
-                    renderInput={(params) => (
-                      <TextField className="my-2" fullWidth {...params} />
-                    )}
-                  />
-                </LocalizationProvider>
+                <Grid item xs={12}>
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DesktopDatePicker
+                      margin="dense"
+                      id="date-picker-dialog-register"
+                      label="Ngày bắt đầu"
+                      inputFormat="MM/dd/yyyy"
+                      name="startDate"
+                      value={new Date(startDate)}
+                      onChange={handleDateChange}
+                      className={classes.datePicker}
+                      renderInput={(params) => (
+                        <TextField className="my-2" fullWidth {...params} />
+                      )}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+                <Grid item xs={12}>
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DesktopDatePicker
+                      margin="dense"
+                      id="date-picker-dialog-register2"
+                      label="Ngày kết thúc"
+                      inputFormat="MM/dd/yyyy"
+                      name="endDate"
+                      value={new Date(endDate)}
+                      onChange={handleDateChange2}
+                      className={classes.datePicker}
+                      renderInput={(params) => (
+                        <TextField className="my-2" fullWidth {...params} />
+                      )}
+                    />
+                  </LocalizationProvider>
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <DesktopDatePicker
-                    margin="dense"
-                    id="date-picker-dialog-register2"
-                    label="Ngày kết thúc"
-                    inputFormat="MM/dd/yyyy"
-                    name="endDate"
-                    value={new Date(endDate)}
-                    onChange={handleDateChange2}
-                    className={classes.datePicker}
-                    renderInput={(params) => (
-                      <TextField className="my-2" fullWidth {...params} />
-                    )}
-                  />
-                </LocalizationProvider>
-              </Grid>
-            </Grid>
-          </form>
-        </DialogContentMui>
-        <DialogActionsMui>
-          {roomError ? (
-            <Alert style={{ marginTop: "15px" }} severity="error">
-              {roomError}
-            </Alert>
-          ) : null}
-          <Button
-            type="submit"
-            className={classes.button}
-            variant="contained"
-            color="secondary"
-            onClick={
-              modal.id === "tao"
-                ? handleSubmit(onAddSubmit)
-                : handleSubmit(onUpdateSubmit)
-            }
-          >
-            {modal.button}
-          </Button>
-        </DialogActionsMui>
-      </Dialog>
-    </div>
+            </form>
+          </DialogContentMui>
+          <DialogActionsMui>
+            {roomError ? (
+              <Alert style={{ marginTop: "15px" }} severity="error">
+                {roomError}
+              </Alert>
+            ) : null}
+            <Button
+              type="submit"
+              className={classes.button}
+              variant="contained"
+              color="secondary"
+              onClick={
+                modal.id === "tao"
+                  ? handleSubmit(onAddSubmit)
+                  : handleSubmit(onUpdateSubmit)
+              }
+            >
+              {modal.button}
+            </Button>
+          </DialogActionsMui>
+        </Dialog>
+      </div>
+    </>
   );
 };
 

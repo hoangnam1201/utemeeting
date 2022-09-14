@@ -8,7 +8,6 @@ const baseURL =
 const instance = axios.create({ baseURL });
 const cookies = new Cookies();
 
-console.log("dasdas", process.env.REACT_APP_HOST_BASE);
 instance.interceptors.request.use((config) => {
   const auth = cookies.get("u_auth");
   if (auth) {
