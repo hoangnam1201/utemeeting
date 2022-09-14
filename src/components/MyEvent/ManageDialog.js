@@ -10,6 +10,7 @@ import {
   Alert,
   Typography,
   Box,
+  CircularProgress,
 } from "@mui/material";
 import { withStyles, makeStyles } from "@mui/styles";
 import { ScaleLoader } from "react-spinners";
@@ -181,17 +182,7 @@ const ManageDialog = (props) => {
 
   return (
     <>
-      <Box className="z-100 inline-block fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <ScaleLoader
-          color="#f50057"
-          loading={loading}
-          height={45}
-          width={5}
-          radius={10}
-          margin={4}
-        />
-      </Box>
-      <div className={`${loading ? `opacity-50` : null}`}>
+      <div>
         <Dialog maxWidth="xs" onClose={handleCloseDialog} open={openDialog}>
           <DialogTitleMui>{modal.title}</DialogTitleMui>
           <DialogContentMui dividers>
@@ -287,6 +278,7 @@ const ManageDialog = (props) => {
               }
             >
               {modal.button}
+              {loading ? <CircularProgress /> : ""}
             </Button>
           </DialogActionsMui>
         </Dialog>

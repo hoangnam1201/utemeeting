@@ -187,7 +187,7 @@ const MyEvent = (props) => {
           margin={4}
         />
       </Box>
-      <div className={`${classes.root} ${loading ? classes.loaderRoot : null}`}>
+      <div className={`${classes.root} ${loading ? `opacity-50` : null}`}>
         <Helmet>
           <title>My Event</title>
           <meta charSet="utf-8" name="description" content="Home" />
