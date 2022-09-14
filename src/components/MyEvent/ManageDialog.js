@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  Button,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -8,7 +7,7 @@ import {
   TextField,
   Grid,
   Alert,
-  LinearProgress,
+  Box,
 } from "@mui/material";
 import { withStyles, makeStyles } from "@mui/styles";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -23,6 +22,7 @@ import { actGetRoom } from "./modules/action";
 import { useCookies } from "react-cookie";
 import { createRoomApi, updateRoomApi } from "../../api/room.api";
 import { LoadingButton } from "@mui/lab";
+import { ScaleLoader } from "react-spinners";
 
 const useStyles = makeStyles((theme) => ({
   form: {
@@ -181,10 +181,22 @@ const ManageDialog = (props) => {
   return (
     <>
       <div>
-        <Dialog maxWidth="xs" onClose={handleCloseDialog} open={openDialog}>
-          <div className={`${loading ? "visible" : "invisible"}`}>
-            <LinearProgress />
-          </div>
+        <Dialog
+          className="relative"
+          maxWidth="xs"
+          onClose={handleCloseDialog}
+          open={openDialog}
+        >
+          <Box className="z-100 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <ScaleLoader
+              color="#f50057"
+              loading={loading}
+              height={45}
+              width={5}
+              radius={10}
+              margin={4}
+            />
+          </Box>
           <DialogTitleMui>{modal.title}</DialogTitleMui>
           <DialogContentMui dividers>
             <form className={classes.form} noValidate>
