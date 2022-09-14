@@ -8,12 +8,9 @@ import {
   TextField,
   Grid,
   Alert,
-  Typography,
-  Box,
-  CircularProgress,
+  LinearProgress,
 } from "@mui/material";
 import { withStyles, makeStyles } from "@mui/styles";
-import { ScaleLoader } from "react-spinners";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
@@ -25,6 +22,7 @@ import { useDispatch } from "react-redux";
 import { actGetRoom } from "./modules/action";
 import { useCookies } from "react-cookie";
 import { createRoomApi, updateRoomApi } from "../../api/room.api";
+import { LoadingButton } from "@mui/lab";
 
 const useStyles = makeStyles((theme) => ({
   form: {
@@ -183,6 +181,9 @@ const ManageDialog = (props) => {
   return (
     <>
       <div>
+        <div className={`${loading ? "visible" : "invisible"}`}>
+          <LinearProgress />
+        </div>
         <Dialog maxWidth="xs" onClose={handleCloseDialog} open={openDialog}>
           <DialogTitleMui>{modal.title}</DialogTitleMui>
           <DialogContentMui dividers>
@@ -266,7 +267,9 @@ const ManageDialog = (props) => {
                 {roomError}
               </Alert>
             ) : null}
-            <Button
+            <LoadingButton
+              loading={loading}
+              loadingPosition="start"
               type="submit"
               className={classes.button}
               variant="contained"
@@ -278,8 +281,7 @@ const ManageDialog = (props) => {
               }
             >
               {modal.button}
-              {loading ? <CircularProgress /> : ""}
-            </Button>
+            </LoadingButton>
           </DialogActionsMui>
         </Dialog>
       </div>
