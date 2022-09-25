@@ -1,24 +1,28 @@
 import React, { useState } from "react";
-import IconButton from "@material-ui/core/IconButton";
-import Avatar from "react-avatar";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import BasicPopover from "../Popover";
-import { useSelector } from "react-redux";
-import { Button, Paper } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
 import JoinerList from "./joinerList";
 import RequestList from "./requestList";
+import { roomRemoveRequestAction } from "../../store/actions/roomCallAction";
 
 const LobbyUser = (props) => {
-  const { openLobby, userJoined, roomInfo, userRequests, connection } = props;
+  const { openLobby, userJoined, roomInfo } = props;
   const currentUser = useSelector((state) => state.userReducer);
   const roomCallState = useSelector((state) => state.roomCall);
+  const dispatch = useDispatch();
   const [tab, setTab] = useState(0);
 
-  const handleBuzzUser = (userId, text) => {
-    connection.current.socket.emit("room:buzz", userId, text);
-    console.log("click");
+  const replyHandlerAll = () => {
+    Object.values(roomCallState.requests).forEach((request) => {
+      roomCallState?.socket.emit(
+        "room:access-request",
+        request.socketId,
+        request.user._id,
+        true
+      );
+      dispatch(roomRemoveRequestAction(request.user._id));
+    });
   };
   return (
     <>
@@ -48,11 +52,7 @@ const LobbyUser = (props) => {
               <div className="px-4 flex justify-start my-2">
                 <button
                   className="shadow-lg text-blue-700 px-4 py-1 text-sm rounded-md hover:bg-gray-100"
-                  onClick={() => {
-                    Object.values(userRequests).forEach((request) => {
-                      connection.current.replyRequest(request, true);
-                    });
-                  }}
+                  onClick={replyHandlerAll}
                 >
                   ACCEPT ALL
                 </button>
