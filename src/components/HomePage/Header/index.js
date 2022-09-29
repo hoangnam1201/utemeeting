@@ -36,7 +36,9 @@ const Header = React.memo(({ type = 0, ...rest }) => {
 
   const handleLogout = () => {
     logoutAPI().then(() => {
-      history.push("/auth/login", "LOGOUT");
+      dispatch(actionRemoveUserInfo());
+      removeCookies("u_auth", { path: "/" });
+      history.push("/auth/login");
       Swal.fire({
         icon: "success",
         title: "Đăng xuất thành công",
@@ -48,13 +50,13 @@ const Header = React.memo(({ type = 0, ...rest }) => {
   };
 
   return (
-    <div {...rest}>
-      <section id="header" className="shadow-lg">
+    <div>
+      <section id="header" className="shadow-sm relative z-30">
         <div className="container-fluid">
           <nav className="navbar navbar-expand-lg navbar-dark">
             <div className="container flex justify-between items-center">
               <Link to="/" className="navbar-brand">
-                <img width="150" height="100" src={imgLogo} alt="" />
+                <img width="150" height="100" src={imgLogo} alt="" referrerPolicy="no-referrer" />
               </Link>
               <div
                 className="collapse navbar-collapse mr-10"
@@ -136,20 +138,20 @@ const Header = React.memo(({ type = 0, ...rest }) => {
               ) : (
                 <div className="collapse navbar-collapse mr-10">
                   <Link to="/auth/login">
-                    <Button
+                    <button
                       variant="outlined"
-                      className="mr-10 border-2 border-black text-black"
+                      className="mr-10 py-2 px-5 rounded text-stone-500 bg-stone-50 shadow hover:bg-stone-200"
                     >
-                      Login
-                    </Button>
+                      Sign In
+                    </button>
                   </Link>
                   <Link to="/auth/register">
-                    <Button
+                    <button
                       variant="outlined"
-                      className="border-2 border-black text-black bg-gray-100"
+                      className="py-2 px-5 rounded bg-stone-400 hover:bg-stone-500 text-white shadow"
                     >
-                      SignUp
-                    </Button>
+                      Sign Up
+                    </button>
                   </Link>
                 </div>
               )}
