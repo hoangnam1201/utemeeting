@@ -20,8 +20,9 @@ import Swal from "sweetalert2";
 import { searchUserAPI } from "../../api/user.api";
 import {
   addMembersAPI,
-  addMembersByFile,
+  addMembersByFileAPI,
   deleteFloorAPI,
+  dowloadMemberCSVFileAPI,
   getRoomAPI,
   increaseFloorAPI,
   removeMemberAPI,
@@ -153,7 +154,7 @@ function UpdateEvent() {
     const fd = new FormData();
     fd.append("importFile", files[0]);
     setMembersLoading(true);
-    await addMembersByFile(id, fd);
+    await addMembersByFileAPI(id, fd);
     await getRoom(null, "UPDATE_MEMBERS");
     e.target.value = null;
   };
@@ -176,6 +177,13 @@ function UpdateEvent() {
       console.log(err);
     }
   };
+
+  function s2ab(s) {
+    var buf = new ArrayBuffer(s.length);
+    var view = new Uint8Array(buf);
+    for (var i = 0; i !== s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+    return buf;
+  }
 
   return (
     <div>
@@ -321,9 +329,8 @@ function UpdateEvent() {
                       dispatch(tableSelectFloorAction(id, f));
                     }}
                     key={f}
-                    className={`shadow-md p-1 whitespace-nowrap rounded text-sm font-thin text-gray-500 snap-start scroll-ml-4 ${
-                      tables?.currentFloor === f && "shadow-lg bg-gray-200"
-                    }`}
+                    className={`shadow-md p-1 whitespace-nowrap rounded text-sm font-thin text-gray-500 snap-start scroll-ml-4 ${tables?.currentFloor === f && "shadow-lg bg-gray-200"
+                      }`}
                   >
                     Floor {index}
                   </button>
@@ -400,29 +407,38 @@ function UpdateEvent() {
                 google account at least once
               </p>
             </div>
-            <div>
-              <Button variant="outlined">
-                <label>
-                  Import by xlsx file
-                  <input
-                    type="file"
-                    onChange={(e) => {
-                      onFileChange(e);
-                    }}
-                    hidden
-                    accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                  />
-                </label>
-              </Button>
-              <p className="text-gray-400 font-thin text-sm">
-                Only files in our{" "}
-                <span
-                  className="font-bold cursor-pointer hover:text-gray-500"
-                  onClick={AboutFormatSwal}
-                >
-                  format
-                </span>
-              </p>
+            <div className="flex gap-2">
+              <div>
+                <Button variant="outlined">
+                  <label>
+                    Import by xlsx file
+                    <input
+                      type="file"
+                      onChange={(e) => {
+                        onFileChange(e);
+                      }}
+                      hidden
+                      accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    />
+                  </label>
+                </Button>
+                <p className="text-gray-400 font-thin text-sm">
+                  Only files in our 
+                  <span
+                    className="font-bold cursor-pointer hover:text-gray-500 mx-1"
+                    onClick={AboutFormatSwal}
+                  >
+                    format
+                  </span>
+                </p>
+              </div>
+              <div>
+                <Button variant="contained">
+                  <a href={`${process.env.REACT_APP_HOST_BASE}/api/room/members/download-csv/${id}`} download='user-list.xlsx'>
+                    Export
+                  </a>
+                </Button>
+              </div>
             </div>
           </div>
           <div
