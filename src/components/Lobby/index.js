@@ -27,8 +27,10 @@ const LobbyUser = (props) => {
   return (
     <>
       <div
-        className={`fixed top-0 left-0 flex flex-col z-50 h-screen bg-white overflow-x-hidden shadow-md transition-all duration-300 ${openLobby ? "w-72" : "w-0"
-          }`}
+        onClick={(e) => e.stopPropagation()}
+        className={`fixed top-0 right-0 flex flex-col z-50 h-screen bg-white overflow-x-hidden shadow-md transition-all duration-300 ${
+          openLobby ? "w-72" : "w-0"
+        }`}
       >
         <div className="shadow mb-2">
           {roomCall?.roomInfo?.owner?._id === currentUser?.user?._id ? (

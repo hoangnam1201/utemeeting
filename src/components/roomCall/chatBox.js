@@ -1,13 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Button from "@mui/material/Button";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  roomCallSendMessage,
-  roomCallSendTableMessage,
-  roomShowChatAction,
-} from "../../store/actions/roomCallAction";
+import { roomCallSendMessage, roomCallSendTableMessage, roomShowChatAction, } from "../../store/actions/roomCallAction";
 import { Waypoint } from "react-waypoint";
 import LinearProgress from "@mui/material/LinearProgress";
 import { sendMessageAction } from "../../store/actions/messageAction";
@@ -22,7 +22,7 @@ const ChatBox = ({ roomMessages, tableMessages, ...rest }) => {
   const [msgText, setMsgText] = useState("");
   const dispatch = useDispatch();
   const currentUser = useSelector((state) => state.userReducer);
-  const roomCall = useSelector((state) => state.roomCall);
+  const roomCall = useSelector(state => state.roomCall)
   const endRef = useRef(null);
   const [files, setFiles] = useState([]);
 
@@ -53,20 +53,16 @@ const ChatBox = ({ roomMessages, tableMessages, ...rest }) => {
   const handleSendMessage = () => {
     if (!msgText && files.length === 0) return;
     if (value === 1) {
-      dispatch(
-        roomCallSendTableMessage({
-          msgString: msgText,
-          files: files.map((f) => ({ data: f, name: f.name })),
-        })
-      );
+      dispatch(roomCallSendTableMessage({
+        msgString: msgText,
+        files: files.map((f) => ({ data: f, name: f.name })),
+      }))
     }
     if (value === 0) {
-      dispatch(
-        roomCallSendMessage({
-          msgString: msgText,
-          files: files.map((f) => ({ data: f, name: f.name })),
-        })
-      );
+      dispatch(roomCallSendMessage({
+        msgString: msgText,
+        files: files.map((f) => ({ data: f, name: f.name })),
+      }))
     }
     setMsgText("");
     setFiles([]);
@@ -169,7 +165,7 @@ const ChatBox = ({ roomMessages, tableMessages, ...rest }) => {
           ))}
         </div>
       )}
-      <div className={`${!roomCall?.chatLoading && "invisible"}`}>
+      <div className={`${!roomCall?.chatLoading && 'invisible'}`}>
         <LinearProgress />
       </div>
       <div className="flex h-11 flex-grow-0 px-1">
@@ -200,9 +196,8 @@ export const Message = React.memo(
     return (
       <div {...rest}>
         <div
-          className={`flex flex-col ${
-            type === 0 ? "items-end" : "items-start"
-          } px-2 overflow-hidden w-full`}
+          className={`flex flex-col ${type === 0 ? "items-end" : "items-start"
+            } px-2 overflow-hidden w-full text-left`}
         >
           <div
             className={`flex p-1 ${type === 0 && "flex-row-reverse"} w-full`}
@@ -230,9 +225,8 @@ export const Message = React.memo(
               </div>
             )}
             <div
-              className={`flex-grow w-0 flex flex-col items-start ${
-                type === 0 && "items-end"
-              }`}
+              className={`flex-grow w-0 flex flex-col items-start ${type === 0 && "items-end"
+                }`}
             >
               {type === 1 && (position === "TOP" || position === "CENTER-END") && (
                 <div
@@ -244,9 +238,8 @@ export const Message = React.memo(
               )}
               {(position === "CENTER" || position === "CENTER-END") && (
                 <div
-                  className={`px-4 py-1 whitespace-normal break-words text-sm font-thin  ${
-                    type === 0 ? "bg-blue-100" : "bg-gray-200"
-                  } rounded-lg`}
+                  className={`px-4 py-1 whitespace-normal break-words text-sm font-thin  ${type === 0 ? "bg-blue-100" : "bg-gray-200"
+                    } rounded-lg`}
                   style={{ maxWidth: "70%" }}
                 >
                   {msgData.files.map((f, index) => (
@@ -291,13 +284,11 @@ export const Message = React.memo(
               )}
               {position === "TOP" && (
                 <div
-                  className={`px-4 py-1 whitespace-normal break-words text-sm font-thin  ${
-                    type === 0 ? "bg-blue-100" : "bg-gray-200"
-                  } ${
-                    type === 0
+                  className={`px-4 py-1 whitespace-normal break-words text-sm font-thin  ${type === 0 ? "bg-blue-100" : "bg-gray-200"
+                    } ${type === 0
                       ? "rounded-l-lg rounded-tr-xl"
                       : "rounded-r-lg rounded-tl-xl"
-                  }`}
+                    }`}
                   style={{ maxWidth: "70%" }}
                 >
                   {msgData.files.map((f, index) => (
@@ -342,13 +333,11 @@ export const Message = React.memo(
               )}
               {position === "BOTTOM" && (
                 <div
-                  className={`px-4 py-1 whitespace-normal break-words text-sm font-thin ${
-                    type === 0 ? "bg-blue-100" : "bg-gray-200"
-                  } ${
-                    type === 0
+                  className={`px-4 py-1 whitespace-normal break-words text-sm font-thin ${type === 0 ? "bg-blue-100" : "bg-gray-200"
+                    } ${type === 0
                       ? "rounded-l-lg rounded-br-xl"
                       : "rounded-r-lg rounded-bl-xl"
-                  }`}
+                    }`}
                   style={{ maxWidth: "70%" }}
                 >
                   {msgData.files.map((f, index) => (

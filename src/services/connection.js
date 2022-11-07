@@ -25,7 +25,7 @@ const peerEndPoint = {
   path: "/peerjs/meeting",
   port: process.env.REACT_APP_HOST_PORT,
 };
-const socketRoomEndPoint = process.env.REACT_APP_HOST_BASE + "/socket/rooms";
+const socketRoomEndPoint = process.env.REACT_APP_SOCKET_HOST + "/rooms";
 const cookies = new Cookies();
 
 const initializePeerConnection = () => {
@@ -35,6 +35,7 @@ const initializePeerConnection = () => {
 const initializeSocketConnection = () => {
   const auth = cookies.get("u_auth");
   return openSocket(socketRoomEndPoint, {
+    transports: ["websocket", "polling"],
     forceNew: true,
     auth: {
       token: "Bearer " + auth.accessToken,
@@ -195,6 +196,12 @@ class Connection {
       );
     });
 
+    this.socket.on("room:disconnect-reason", (reason) => {
+      textSwal(reason, () => {
+        window.location.reload();
+      });
+    })
+
     this.socket.on("table:user-leave", (data) => {
       const { peerId } = data;
       this.peers[peerId]?.close();
@@ -353,6 +360,7 @@ class Connection {
 
     this.socket.on("present:user-leave", (data) => {
       const { peerId } = data;
+      console.log(peerId);
       this.peers[peerId]?.close();
       delete this.streamDatas[peerId];
       this.setting.updateInstance("streamDatas", { ...this.streamDatas });
@@ -420,10 +428,10 @@ class Connection {
     });
 
     this.socket.on("disconnect", (reason) => {
-      if (reason === "io server disconnect")
-        textSwal("You are kicked out of room", () => {
-          window.location.reload();
-        });
+      // if (reason === "io server disconnect")
+      //   textSwal("You are kicked out of room", () => {
+      //     window.location.reload();
+      //   });
     });
 
     this.socket.on("error", (err) => {
