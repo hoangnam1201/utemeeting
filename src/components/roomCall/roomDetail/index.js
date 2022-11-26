@@ -81,17 +81,16 @@ const RoomDetail = ({
         roomInfo={roomInfo}
       />
       <ListQuiz />
-      <div className=" fixed z-30 top-full transform -translate-y-full w-max left-1/2 -translate-x-1/2">
+      <div>
         {
           isMobile ? (
             <MobileToolbar
-              className="bg-white rounded-lg shadow-inner"
               mediaStatus={mediaStatus}
               userJoined={userJoined}
             />
           ) : (
             <Toolbar
-              className="bg-white rounded-lg shadow-inner"
+              className="bg-white rounded-lg shadow-inner fixed z-30 top-full transform -translate-y-full w-max left-1/2 -translate-x-1/2"
               mediaStatus={mediaStatus}
               userJoined={userJoined}
             />

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
 import ChatIcon from "@mui/icons-material/Chat";
-import ScreenShareIcon from "@mui/icons-material/ScreenShare";
 import MicOffIcon from "@mui/icons-material/MicOff";
 import PresentToAllIcon from "@mui/icons-material/PresentToAll";
 import VideocamOff from "@mui/icons-material/VideocamOff";
@@ -26,13 +25,18 @@ import { sendMessageAction } from "../../store/actions/messageAction";
 import { confirmPresent, confirmSwal } from "../../services/swalServier";
 import { Link } from "react-router-dom";
 import PeopleIcon from "@mui/icons-material/People";
-import { LinearProgress, Switch } from "@mui/material";
+import { Box, Drawer, LinearProgress, List, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Switch } from "@mui/material";
 import Connection from "../../services/connection";
+import AppSettingsAltIcon from '@mui/icons-material/AppSettingsAlt';
+import TableRestaurantIcon from '@mui/icons-material/TableRestaurant';
+import GroupIcon from '@mui/icons-material/Group';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 const MobileToolbar = ({ mediaStatus, userJoined, ...rest }) => {
   const roomCall = useSelector((state) => state.roomCall);
   const currentUser = useSelector((state) => state.userReducer);
   const dispatch = useDispatch();
+  const [open, setOpen] = useState(false);
   const [autoHidden, setAutoHidden] = useState(false);
 
   const stateMessage = useSelector(
@@ -72,14 +76,19 @@ const MobileToolbar = ({ mediaStatus, userJoined, ...rest }) => {
       dispatch(roomCallJoinTable(roomCall.selectedTable, mediaStatus));
     }
   };
+
   const cancelSeleted = () => {
     if (!roomCall.joinLoading) dispatch(setSeletedTable(null));
   };
 
+  const openNewTab = (url) => {
+    window.open(url, '_blank')
+  }
+
   return (
-    <div {...rest}>
+    <div>
       {roomCall?.selectedTable && (
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-full transform z-10 shadow-lg bg-white py-1 px-10 ">
+        <div className=" fixed left-1/2 bottom-0 -translate-x-1/2 -translate-y-1/2 transform z-10 shadow-lg bg-white py-1 px-10">
           <div className="flex items-center gap-4">
             <p className=" whitespace-nowrap max-w-xs text-ellipsis overflow-hidden">
               you is selecting <b>{roomCall?.selectedTable}</b>
@@ -106,6 +115,168 @@ const MobileToolbar = ({ mediaStatus, userJoined, ...rest }) => {
           </div>
         </div>
       )}
+      <div className=" fixed bottom-0 left-0 bg-gray-100 rounded-full shadow-md transform -translate-y-1/2 translate-x-1/2 border border-gray-200">
+        <IconButton onClick={() => setOpen(true)}>
+          <AppSettingsAltIcon fontSize="large" />
+        </IconButton>
+        <IconButton
+          onClick={() => {
+            if (roomCall) dispatch(roomShowChatAction(!roomCall.showChat));
+            dispatch(sendMessageAction());
+          }}
+        >
+          {stateMessage && !roomCall.showChat ? (
+            <Badge color="primary" variant="dot">
+              <ChatIcon fontSize="large" className={roomCall.showChat ? 'text-blue-500' : ''} />
+            </Badge>
+          ) : (
+            <ChatIcon fontSize="large" className={roomCall.showChat ? 'text-blue-500' : ''} />
+          )}
+        </IconButton>
+        <IconButton
+          onClick={() => {
+            dispatch(roomShowQuizsAction(true))
+          }}>
+          <QuizIcon fontSize="large" />
+        </IconButton>
+        <IconButton
+          onClick={(e) => {
+            dispatch(roomShowLobbyAction(true));
+            e.stopPropagation();
+          }}
+        >
+          <PeopleIcon fontSize="large" />
+        </IconButton>
+
+      </div>
+
+      <React.Fragment>
+        <Drawer
+          anchor="right"
+          open={open}
+          onClose={() => setOpen(false)}
+        >
+          <Box>
+
+            <List
+              subheader={
+                <ListSubheader component="div" id="nested-list-subheader">
+                  Toolbar items
+                </ListSubheader>
+              }
+            >
+              {
+                mediaStatus.audio ? (
+                  <ListItemButton onClick={turnOffAudio}>
+                    <ListItemIcon>
+                      <MicIcon />
+                    </ListItemIcon>
+                    <ListItemText primary='Microphone' />
+                  </ListItemButton>
+                ) : (
+                  <ListItemButton onClick={turnOnAudio}>
+                    <ListItemIcon>
+                      <MicOffIcon />
+                    </ListItemIcon>
+                    <ListItemText primary='Microphone' />
+                  </ListItemButton>
+                )
+              }
+              {
+                mediaStatus.video ? (
+                  <ListItemButton onClick={turnOffVideo}>
+                    <ListItemIcon>
+                      <PhotoCameraFrontIcon />
+                    </ListItemIcon>
+                    <ListItemText primary='camera' />
+                  </ListItemButton>
+                ) : (
+                  <ListItemButton onClick={turnOnVideo}>
+                    <ListItemIcon>
+                      <VideocamOff />
+                    </ListItemIcon>
+                    <ListItemText primary='camera' />
+                  </ListItemButton>
+                )
+              }
+              {roomCall?.roomInfo?.owner._id === currentUser?.user._id && (
+                <React.Fragment>
+                  <ListItemButton
+                    onClick={onPresent}>
+                    <ListItemIcon>
+                      <PresentToAllIcon />
+                    </ListItemIcon>
+                    <ListItemText primary='Present' />
+                  </ListItemButton>
+                  <ListItemButton
+                    onClick={() => {
+                      openNewTab(
+                        `/user/update-event/${roomCall?.roomInfo?._id}`
+                      )
+                    }}
+                  >
+                    <ListItemIcon>
+                      <SettingsIcon />
+                    </ListItemIcon>
+                    <ListItemText primary='Room setting' />
+                  </ListItemButton>
+                  <ListItemButton
+                    onClick={() => openNewTab(`/user/management-groups/${roomCall?.roomInfo?._id}`)}
+                  >
+                    <ListItemIcon>
+                      <GroupIcon />
+                    </ListItemIcon>
+                    <ListItemText primary='Group management' />
+                  </ListItemButton>
+                  <ListItemButton onClick={() => {
+                    confirmSwal("Divide Into Tables", "", () => {
+                      roomCall.socket.emit("room:divide-tables");
+                    })
+                  }
+                  }>
+                    <ListItemIcon>
+                      <TableRestaurantIcon />
+                    </ListItemIcon>
+                    <ListItemText primary='divide into tables' />
+                  </ListItemButton>
+                  <ListItemButton onClick={() => {
+                    confirmSwal('Are you sure?', "close room", () => {
+                      dispatch(roomCallCloseRoomAction(() => {
+                        window.location.replace('/user/my-event');
+                      }))
+                    })
+                  }}>
+                    <ListItemIcon>
+                      <TableRestaurantIcon />
+                    </ListItemIcon>
+                    <ListItemText primary='close room' />
+                  </ListItemButton>
+                </React.Fragment>
+              )}
+              <ListItemButton
+                onClick={() => Connection.leaveTable()}
+              >
+                <ListItemIcon>
+                  <EventSeatIcon />
+                </ListItemIcon>
+                <ListItemText primary='exit table' />
+              </ListItemButton>
+              <ListItemButton
+                onClick={() =>
+                  confirmSwal("Are you sure?", "", () => {
+                    window.location.replace('/user/my-event');
+                  })
+                }
+              >
+                <ListItemIcon>
+                  <LogoutSharpIcon />
+                </ListItemIcon>
+                <ListItemText primary='exit room' />
+              </ListItemButton>
+            </List>
+          </Box>
+        </Drawer>
+      </React.Fragment>
       <div className="shadow mt-2 p-2 group">
         <div
           className={`flex relative ${autoHidden &&
@@ -119,26 +290,8 @@ const MobileToolbar = ({ mediaStatus, userJoined, ...rest }) => {
                   <MoreVertIcon />
                 </div>
                 <div className="hidden flex-col absolute z-50 top-0 left-0 transform bg-white -translate-y-full -translate-x-1/2 shadow-md peer-hover:flex hover:flex rounded-md">
-                  <button
-                    className="p-2 text-gray-500 focus:outline-none text-sm font-semibold capitalize hover:bg-gray-200 whitespace-nowrap"
-                    onClick={() => {
-                      confirmSwal("Divide Into Tables", "", () => {
-                        roomCall.socket.emit("room:divide-tables");
-                      });
-                    }}
-                  >
-                    divide into tables
-                  </button>
-
                   <Link
-                    to={`/user/management-groups/${roomCall?.roomInfo._id}`}
-                    target="_blank"
-                    className="p-2 text-gray-500 focus:outline-none text-sm font-semibold capitalize hover:bg-gray-200 whitespace-nowrap"
-                  >
-                    Groups management
-                  </Link>
-                  <Link
-                    to={`/user/update-event/${roomCall?.roomInfo._id}`}
+                    to={`/user/update-event/${roomCall?.roomInfo?._id}`}
                     target="_blank"
                     className="p-2 text-gray-500 focus:outline-none text-sm font-semibold capitalize hover:bg-gray-200 whitespace-nowrap"
                   >
@@ -196,42 +349,12 @@ const MobileToolbar = ({ mediaStatus, userJoined, ...rest }) => {
               )}
             </IconButton>
             <IconButton
-              onClick={(e) => {
-                dispatch(roomShowLobbyAction(true));
-                e.stopPropagation();
-              }}
-            >
-              <PeopleIcon fontSize="large" />
-            </IconButton>
-            <IconButton
               onClick={() => {
                 dispatch(roomShowQuizsAction(true))
               }}>
               <QuizIcon fontSize="large" />
             </IconButton>
             <div className="border-l-2 border-gray-400 px-3 flex items-end">
-              <button
-                className="p-2 text-gray-500 focus:outline-none text-sm font-semibold"
-                onClick={() => Connection.leaveTable()}
-              >
-                <div>
-                  <EventSeatIcon className="text-gray-500" />
-                </div>
-                exit table
-              </button>
-              <button
-                className="p-2 text-gray-500 focus:outline-none text-sm font-semibold"
-                onClick={() =>
-                  confirmSwal("Are you sure?", "", () => {
-                    window.location.replace('/user/my-event');
-                  })
-                }
-              >
-                <div>
-                  <LogoutSharpIcon className="text-gray-500" />
-                </div>
-                exit room
-              </button>
               {roomCall?.roomInfo?.owner._id === currentUser?.user._id && (
                 <button
                   className="p-2 text-gray-500 focus:outline-none text-sm font-semibold"

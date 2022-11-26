@@ -24,7 +24,7 @@ import {
 } from "../../store/actions/roomCallAction";
 import { sendMessageAction } from "../../store/actions/messageAction";
 import { confirmPresent, confirmSwal } from "../../services/swalServier";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import PeopleIcon from "@mui/icons-material/People";
 import { useReactMediaRecorder } from "react-media-recorder";
 import { LinearProgress, Switch } from "@mui/material";
@@ -34,6 +34,7 @@ const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
   const roomCall = useSelector((state) => state.roomCall);
   const currentUser = useSelector((state) => state.userReducer);
   const dispatch = useDispatch();
+  const history = useHistory();
   const [autoHidden, setAutoHidden] = useState(false);
   const { status, startRecording, stopRecording, clearBlobUrl } = useReactMediaRecorder({
     screen: true,
