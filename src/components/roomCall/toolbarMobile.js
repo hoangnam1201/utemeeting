@@ -157,7 +157,6 @@ const MobileToolbar = ({ mediaStatus, userJoined, ...rest }) => {
           onClose={() => setOpen(false)}
         >
           <Box>
-
             <List
               subheader={
                 <ListSubheader component="div" id="nested-list-subheader">
@@ -277,111 +276,6 @@ const MobileToolbar = ({ mediaStatus, userJoined, ...rest }) => {
           </Box>
         </Drawer>
       </React.Fragment>
-      <div className="shadow mt-2 p-2 group">
-        <div
-          className={`flex relative ${autoHidden &&
-            " max-h-0 group-hover:max-h-96 duration-1000 transition-all overflow-hidden hover:overflow-visible"
-            }`}
-        >
-          {roomCall?.roomInfo?.owner._id === currentUser?.user._id && (
-            <div className="border-r-2 border-gray-400 px-3 flex items-center static">
-              <div className="relative">
-                <div className="peer text-gray-500 p-2">
-                  <MoreVertIcon />
-                </div>
-                <div className="hidden flex-col absolute z-50 top-0 left-0 transform bg-white -translate-y-full -translate-x-1/2 shadow-md peer-hover:flex hover:flex rounded-md">
-                  <Link
-                    to={`/user/update-event/${roomCall?.roomInfo?._id}`}
-                    target="_blank"
-                    className="p-2 text-gray-500 focus:outline-none text-sm font-semibold capitalize hover:bg-gray-200 whitespace-nowrap"
-                  >
-                    Room Setting
-                  </Link>
-                </div>
-              </div>
-              <button
-                className="p-2 text-gray-500 focus:outline-none text-sm font-semibold"
-                onClick={onPresent}
-              >
-                <div>
-                  <PresentToAllIcon className="text-gray-500" />
-                </div>
-                present
-              </button>
-            </div>
-          )}
-          <div className="flex gap-4 px-4">
-            {mediaStatus.audio ? (
-              <IconButton onClick={turnOffAudio}>
-                <MicIcon className="text-blue-500" fontSize="large" />
-              </IconButton>
-            ) : (
-              <IconButton onClick={turnOnAudio}>
-                <MicOffIcon className="text-red-600" fontSize="large" />
-              </IconButton>
-            )}
-            {mediaStatus.video ? (
-              <IconButton
-                onClick={turnOffVideo}
-              >
-                <PhotoCameraFrontIcon
-                  className="text-blue-500"
-                  fontSize="large"
-                />
-              </IconButton>
-            ) : (
-              <IconButton onClick={turnOnVideo}>
-                <VideocamOff className="text-red-600" fontSize="large" />
-              </IconButton>
-            )}
-            <IconButton
-              onClick={() => {
-                if (roomCall) dispatch(roomShowChatAction(!roomCall.showChat));
-                dispatch(sendMessageAction());
-              }}
-            >
-              {stateMessage && !roomCall.showChat ? (
-                <Badge color="primary" variant="dot">
-                  <ChatIcon fontSize="large" className={roomCall.showChat ? 'text-blue-500' : ''} />
-                </Badge>
-              ) : (
-                <ChatIcon fontSize="large" className={roomCall.showChat ? 'text-blue-500' : ''} />
-              )}
-            </IconButton>
-            <IconButton
-              onClick={() => {
-                dispatch(roomShowQuizsAction(true))
-              }}>
-              <QuizIcon fontSize="large" />
-            </IconButton>
-            <div className="border-l-2 border-gray-400 px-3 flex items-end">
-              {roomCall?.roomInfo?.owner._id === currentUser?.user._id && (
-                <button
-                  className="p-2 text-gray-500 focus:outline-none text-sm font-semibold"
-                  onClick={() => {
-                    confirmSwal('Are you sure?', "close room", () => {
-                      dispatch(roomCallCloseRoomAction(() => {
-                        window.location.replace('/user/my-event');
-                      }))
-                    })
-                  }}
-                >
-                  <div>
-                    <DoorBackIcon />
-                  </div>
-                  close room
-                </button>
-              )}
-              <div className="p-2 text-gray-500 focus:outline-none text-sm font-semibold">
-                <label onClick={() => setAutoHidden(!autoHidden)}>
-                  <Switch value={autoHidden} />
-                  <p>auto hide</p>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div >
   );
 };
