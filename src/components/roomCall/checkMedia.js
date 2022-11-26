@@ -165,7 +165,7 @@ const CheckMedia = ({ myStream, canAccess, joinError }) => {
                 <Alert severity="warning">
                   This room is <strong className="lowercase">{roomInfo?.state} </strong>- <strong>Can't join</strong>
                 </Alert>
-                {roomInfo?.owner._id === currentUser?.user._id && (
+                {roomInfo?.owner?._id === currentUser?.user?._id && (
                   loading ? (
                     <CircularProgress />
                   ) : (

@@ -26,50 +26,19 @@ import { sendMessageAction } from "../../store/actions/messageAction";
 import { confirmPresent, confirmSwal } from "../../services/swalServier";
 import { Link } from "react-router-dom";
 import PeopleIcon from "@mui/icons-material/People";
-import { useReactMediaRecorder } from "react-media-recorder";
 import { LinearProgress, Switch } from "@mui/material";
 import Connection from "../../services/connection";
 
-const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
+const MobileToolbar = ({ mediaStatus, userJoined, ...rest }) => {
   const roomCall = useSelector((state) => state.roomCall);
   const currentUser = useSelector((state) => state.userReducer);
   const dispatch = useDispatch();
   const [autoHidden, setAutoHidden] = useState(false);
-  const { status, startRecording, stopRecording, clearBlobUrl } = useReactMediaRecorder({
-    screen: true,
-    audio: true,
-    blobPropertyBag: { type: 'video/mp4' },
-    onStop: (bloburl, blob) => {
-      downloadRecord(bloburl, blob)
-    },
-  });
-
-  useEffect(() => {
-    return () => {
-      stopRecording();
-      clearBlobUrl();
-    }
-  }, [])
 
   const stateMessage = useSelector(
     (state) => state.notifyMessageReducer.isReceive
   );
 
-  const downloadRecord = async (blobUrl, blob) => {
-    const file = new File([blob], 'aaa.mp4', { type: 'video/mp4' });
-    const urldata = window.URL.createObjectURL(file);
-    const a = document.createElement("a");
-    document.body.appendChild(a);
-    a.style = "display: none";
-    a.href = urldata;
-    a.download = roomCall?.roomInfo._id + ".mp4";
-    a.click();
-    a.remove();
-  };
-
-  const turnOnRecord = () => {
-    startRecording();
-  };
   const turnOffAudio = () => {
     Connection.turnOffAudio();
   };
@@ -161,22 +130,6 @@ const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
                     divide into tables
                   </button>
 
-                  {status !== "recording" ? (
-                    <button
-                      className="p-2 text-gray-500 focus:outline-none text-sm font-semibold capitalize hover:bg-gray-200 whitespace-nowrap"
-                      onClick={turnOnRecord}
-                    >
-                      Record meeting
-                    </button>
-                  ) : (
-                    <button
-                      className="p-2 text-gray-500 focus:outline-none text-sm font-semibold capitalize hover:bg-gray-200 whitespace-nowrap"
-                      onClick={stopRecording}
-                    >
-                      Stop recording
-                    </button>
-                  )}
-
                   <Link
                     to={`/user/management-groups/${roomCall?.roomInfo._id}`}
                     target="_blank"
@@ -228,12 +181,6 @@ const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
                 <VideocamOff className="text-red-600" fontSize="large" />
               </IconButton>
             )}
-            <IconButton onClick={shareScreen}>
-              <ScreenShareIcon
-                fontSize="large"
-                className={`${roomCall.sharing && "text-blue-500"}`}
-              />
-            </IconButton>
             <IconButton
               onClick={() => {
                 if (roomCall) dispatch(roomShowChatAction(!roomCall.showChat));
@@ -316,4 +263,4 @@ const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
   );
 };
 
-export default Toolbar;
+export default MobileToolbar;

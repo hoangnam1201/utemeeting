@@ -11,6 +11,8 @@ import PinVideo from "./pinVideo";
 import ListFloor from "./listFloor";
 import ListTable from "./listTable";
 import ListQuiz from "./listQuiz";
+import { isMobile } from "react-device-detect";
+import MobileToolbar from "../toolbarMobile";
 
 const RoomDetail = ({
   roomTables,
@@ -80,11 +82,21 @@ const RoomDetail = ({
       />
       <ListQuiz />
       <div className=" fixed z-30 top-full transform -translate-y-full w-max left-1/2 -translate-x-1/2">
-        <Toolbar
-          className="bg-white rounded-lg shadow-inner"
-          mediaStatus={mediaStatus}
-          userJoined={userJoined}
-        />
+        {
+          isMobile ? (
+            <MobileToolbar
+              className="bg-white rounded-lg shadow-inner"
+              mediaStatus={mediaStatus}
+              userJoined={userJoined}
+            />
+          ) : (
+            <Toolbar
+              className="bg-white rounded-lg shadow-inner"
+              mediaStatus={mediaStatus}
+              userJoined={userJoined}
+            />
+          )
+        }
       </div>
       <Present
         mediaStatus={mediaStatus}
