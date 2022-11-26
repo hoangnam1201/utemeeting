@@ -84,13 +84,13 @@ const RoomDetail = ({
       <div>
         {
           isMobile ? (
-            <Toolbar
-              className="bg-white rounded-lg shadow-inner fixed z-30 top-full transform -translate-y-full w-max left-1/2 -translate-x-1/2"
+            <MobileToolbar
               mediaStatus={mediaStatus}
               userJoined={userJoined}
             />
           ) : (
-            <MobileToolbar
+            <Toolbar
+              className="bg-white rounded-lg shadow-inner fixed z-30 top-full transform -translate-y-full w-max left-1/2 -translate-x-1/2"
               mediaStatus={mediaStatus}
               userJoined={userJoined}
             />
