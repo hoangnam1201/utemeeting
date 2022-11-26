@@ -36,19 +36,19 @@ const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const [autoHidden, setAutoHidden] = useState(false);
-  const { status, startRecording, stopRecording, clearBlobUrl } = useReactMediaRecorder({
-    screen: true,
-    audio: true,
-    blobPropertyBag: { type: 'video/mp4' },
-    onStop: (bloburl, blob) => {
-      downloadRecord(bloburl, blob)
-    },
-  });
+  // const { status, startRecording, stopRecording, clearBlobUrl } = useReactMediaRecorder({
+  //   screen: true,
+  //   audio: true,
+  //   blobPropertyBag: { type: 'video/mp4' },
+  //   onStop: (bloburl, blob) => {
+  //     downloadRecord(bloburl, blob)
+  //   },
+  // });
 
   useEffect(() => {
     return () => {
-      stopRecording();
-      clearBlobUrl();
+      // stopRecording();
+      // clearBlobUrl();
     }
   }, [])
 
@@ -69,7 +69,7 @@ const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
   };
 
   const turnOnRecord = () => {
-    startRecording();
+    // startRecording();
   };
   const turnOffAudio = () => {
     Connection.turnOffAudio();
@@ -172,7 +172,7 @@ const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
                   ) : (
                     <button
                       className="p-2 text-gray-500 focus:outline-none text-sm font-semibold capitalize hover:bg-gray-200 whitespace-nowrap"
-                      onClick={stopRecording}
+                      // onClick={stopRecording}
                     >
                       Stop recording
                     </button>
