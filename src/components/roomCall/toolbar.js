@@ -26,7 +26,7 @@ import { sendMessageAction } from "../../store/actions/messageAction";
 import { confirmPresent, confirmSwal } from "../../services/swalServier";
 import { Link, useHistory } from "react-router-dom";
 import PeopleIcon from "@mui/icons-material/People";
-import { useReactMediaRecorder } from "react-media-recorder";
+// import { useReactMediaRecorder } from "react-media-recorder";
 import { LinearProgress, Switch } from "@mui/material";
 import Connection from "../../services/connection";
 
@@ -162,7 +162,7 @@ const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
                     divide into tables
                   </button>
 
-                  {status !== "recording" ? (
+                  {/* {status !== "recording" ? (
                     <button
                       className="p-2 text-gray-500 focus:outline-none text-sm font-semibold capitalize hover:bg-gray-200 whitespace-nowrap"
                       onClick={turnOnRecord}
@@ -176,7 +176,7 @@ const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
                     >
                       Stop recording
                     </button>
-                  )}
+                  )} */}
 
                   <Link
                     to={`/user/management-groups/${roomCall?.roomInfo._id}`}
