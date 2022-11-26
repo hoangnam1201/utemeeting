@@ -3,13 +3,15 @@ import {
   QUIZ_SUCCESS,
   QUIZ_ERROR,
   QUIZ_SELECTED,
+  QUIZ_SETCURRENT,
 } from "../actions/quizAction";
 
 const initialState = {
   loading: false,
   err: "",
   data: [],
-  selectedQuiz: [],
+  selectedQuiz: null,
+  current: null,
 };
 
 export const quizReducer = (state = initialState, { type, payload }) => {
@@ -20,6 +22,8 @@ export const quizReducer = (state = initialState, { type, payload }) => {
       return { ...state, loading: false, data: payload };
     case QUIZ_SELECTED:
       return { ...state, selectedQuiz: payload };
+    case QUIZ_SETCURRENT:
+      return { ...state, loading: false, current: payload };
     case QUIZ_ERROR:
       return { ...state, loading: false, err: payload };
     default:

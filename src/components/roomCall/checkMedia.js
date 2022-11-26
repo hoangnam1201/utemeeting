@@ -8,36 +8,39 @@ import VideocamOffIcon from "@mui/icons-material/VideocamOff";
 import { useParams } from "react-router";
 import { getRoomAPI, updateStateRoomApi } from "../../api/room.api";
 import { useSelector } from "react-redux";
+import { toastError } from "../../services/toastService";
 
-const CheckMedia = ({ connection, myStream, canAccess, joinError }) => {
+const CheckMedia = ({ myStream, canAccess, joinError }) => {
   const myVideo = useRef(null);
   const roomCall = useSelector(state => state.roomCall);
   const currentUser = useSelector(state => state.userReducer);
-  const [media, setMedia] = useState({ audio: false, video: false });
   const [roomInfo, setRoomInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const { id } = useParams();
 
   const turnOffAudio = () => {
-    connection.current.turnOffAudio();
+    Connection.turnOffAudio();
   };
 
   const turnOnAudio = () => {
-    connection.current.turnOnAudio();
+    Connection.turnOnAudio();
   };
 
   const turnOffVideo = () => {
-    connection.current.turnOffVideo();
+    Connection.turnOffVideo();
   };
 
   const turnOnVideo = () => {
-    connection.current.turnOnVideo();
+    Connection.turnOnVideo();
   };
 
   const openRoomHandler = () => {
     setLoading(true);
     updateStateRoomApi(id, 'OPENING').then(() => {
       getRoomInfo()
+    }).catch((e) => {
+      toastError(e.response.data.msg)
+      setLoading(false)
     })
   }
 
@@ -56,7 +59,6 @@ const CheckMedia = ({ connection, myStream, canAccess, joinError }) => {
     if (!myStream.stream) return;
     myVideo.current.srcObject = myStream.stream;
     myVideo.current.muted = myStream.stream;
-    setMedia(Connection.getMediaStatus(myStream.stream));
   }, [myStream]);
 
   const joinRoomHandler = () => {
@@ -75,7 +77,7 @@ const CheckMedia = ({ connection, myStream, canAccess, joinError }) => {
           autoPlay
           style={{ width: "500px", height: "376px" }}
         />
-        {!media.video && (
+        {!myStream?.media?.video && (
           <div
             className="absolute z-20 top-1/2 left-1/2 text-white transform -translate-x-1/2
                 -translate-y-1/2 text-xl font-semibold"
@@ -96,7 +98,7 @@ const CheckMedia = ({ connection, myStream, canAccess, joinError }) => {
         {canAccess ? (
           <>
             <div className="flex justify-center gap-4 mb-4 ">
-              {media.audio ? (
+              {myStream?.media?.audio ? (
                 <IconButton
                   variant="contained"
                   color="primary"
@@ -113,7 +115,7 @@ const CheckMedia = ({ connection, myStream, canAccess, joinError }) => {
                   <MicOffIcon fontSize="large" className="text-red-500" />
                 </IconButton>
               )}
-              {media.video ? (
+              {myStream?.media?.video ? (
                 <IconButton
                   variant="contained"
                   color="primary"

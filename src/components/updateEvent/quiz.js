@@ -14,10 +14,11 @@ import {
   updateQuizActon,
 } from "../../store/actions/quizAction";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import SettingsIcon from "@mui/icons-material/Settings";
+import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import Swal from "sweetalert2";
+import { DesktopDateTimePicker } from "@mui/x-date-pickers";
 
 const QuizManage = (props) => {
   const { roomId } = props;
@@ -32,7 +33,10 @@ const QuizManage = (props) => {
     setValue,
   } = useForm({
     mode: "onChange",
-    defaultValues: { startDate: new Date().getTime() },
+    defaultValues: {
+      startDate: new Date().getTime(),
+      endDate: new Date().getTime()
+    },
   });
 
   useEffect(() => {
@@ -40,13 +44,15 @@ const QuizManage = (props) => {
   }, [roomId]);
 
   useEffect(() => {
-    if (quiz && quiz.selectedQuiz.length > 0) {
-      const quizData = quiz.data.find((x) => x._id === quiz.selectedQuiz[0]);
+    if (quiz && quiz.selectedQuiz) {
+      const quizData = quiz.data.find((x) => x._id === quiz.selectedQuiz);
       reset({
         name: quizData?.name,
         description: quizData?.description,
         startDate: quizData?.startDate,
+        endDate: quizData?.endDate,
         duration: quizData?.duration,
+        countSubmission: quizData?.countSubmission,
       });
     } else {
       reset({
@@ -54,6 +60,7 @@ const QuizManage = (props) => {
         description: "",
         duration: "",
         startDate: new Date().getTime(),
+        endDate: new Date().getTime(),
       });
     }
   }, [quiz?.selectedQuiz]);
@@ -66,11 +73,14 @@ const QuizManage = (props) => {
           name: "",
           description: "",
           duration: "",
+          countSubmission: 1,
           startDate: new Date().getTime(),
+          endDate: new Date().getTime()
         });
       })
     );
   };
+
   const updateQuiz = (data) => {
     const quizData = { ...data, room: roomId };
     if (quiz.selectedQuiz) {
@@ -80,15 +90,17 @@ const QuizManage = (props) => {
             name: "",
             description: "",
             duration: "",
+            countSubmission: 1,
             startDate: new Date().getTime(),
+            endDate: new Date().getTime()
           });
         })
       );
     }
   };
 
-  const handleDateChange = (date) => {
-    setValue("startDate", date.getTime(), { shouldValidate: true });
+  const handleDateChange = (date, key) => {
+    setValue(key, date.getTime(), { shouldValidate: true });
   };
 
   const selectedQuiz = (id) => {
@@ -134,11 +146,10 @@ const QuizManage = (props) => {
                 return (
                   <div
                     onClick={() => selectedQuiz(q._id)}
-                    className={`group rounded-md mt-4 ${
-                      quiz.selectedQuiz.indexOf(q._id) !== -1
-                        ? "border-2 border-gray-500"
-                        : ""
-                    } `}
+                    className={`group rounded-md mt-4 ${quiz.selectedQuiz === q._id
+                      ? "border-2 border-gray-500"
+                      : ""
+                      } `}
                     key={q._id}
                   >
                     <div className="grid grid-cols-2 px-4 py-2 bg-gray-100 rounded-md text-sm text-gray-500 group-hover:bg-slate-300">
@@ -148,6 +159,14 @@ const QuizManage = (props) => {
                       <div className="text-left pl-3 flex justify-between">
                         {q.duration} minutes
                         <div>
+                          <Link
+                            to={`/user/quiz-scores/${q._id}`}
+                            target="_blank"
+                            className="mr-4"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <AppRegistrationIcon fontSize="small" />
+                          </Link>
                           <Link
                             to={`/user/management-quiz/${q._id}`}
                             target="_blank"
@@ -176,17 +195,10 @@ const QuizManage = (props) => {
                 fullWidth
                 variant="outlined"
                 margin="dense"
-                disabled={quiz?.selectedQuiz.length > 1}
                 InputLabelProps={{ shrink: true }}
                 label="Name of quiz"
                 name="name"
-                {...register("name", {
-                  required: quiz?.selectedQuiz.length > 1 ? null : "Required",
-                  minLength:
-                    quiz?.selectedQuiz.length > 1
-                      ? null
-                      : { value: 5, message: "Min length is 5" },
-                })}
+                {...register("name", { required: 'required' })}
                 error={!!errors?.name}
                 helperText={errors?.name?.message}
               />
@@ -194,59 +206,76 @@ const QuizManage = (props) => {
                 fullWidth
                 variant="outlined"
                 margin="dense"
-                disabled={quiz?.selectedQuiz.length > 1}
                 InputLabelProps={{ shrink: true }}
                 label="Description"
                 name="description"
                 {...register("description", {
-                  required: quiz?.selectedQuiz.length > 1 ? null : "Required",
-                  minLength:
-                    quiz?.selectedQuiz.length > 1
-                      ? null
-                      : { value: 5, message: "Min length is 5" },
+                  required: 'required',
+                  minLength: { value: 5, message: "Min length is 5" },
                 })}
                 error={!!errors?.description}
                 helperText={errors?.description?.message}
               />
               <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DesktopDatePicker
+                <DesktopDateTimePicker
                   variant="outlined"
                   margin="dense"
-                  disabled={quiz?.selectedQuiz.length > 1}
                   InputLabelProps={{ shrink: true }}
                   id="date-picker-dialog-register"
                   label="Start Date"
-                  inputFormat="MM/dd/yyyy"
                   value={new Date(getValues("startDate"))}
-                  onChange={handleDateChange}
+                  onChange={(e) => handleDateChange(e, 'startDate')}
                   renderInput={(params) => (
                     <TextField className="my-2" fullWidth {...params} />
                   )}
                 />
-                <TextField
-                  fullWidth
+              </LocalizationProvider>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DesktopDateTimePicker
                   variant="outlined"
-                  disabled={quiz?.selectedQuiz.length > 1}
-                  InputLabelProps={{ shrink: true }}
-                  InputProps={{ inputProps: { min: 15, max: 120 } }}
                   margin="dense"
-                  label="Duration"
-                  {...register("duration", {
-                    required: quiz?.selectedQuiz.length > 1 ? null : "Required",
-                    max:
-                      quiz?.selectedQuiz.length > 1
-                        ? null
-                        : { value: 120, message: "Max duraion is 120 minutes" },
-                    min:
-                      quiz?.selectedQuiz.length > 1
-                        ? null
-                        : { value: 15, message: "Min duraion is 15 minutes" },
-                  })}
-                  error={!!errors?.duration}
-                  helperText={errors?.duration?.message}
+                  InputLabelProps={{ shrink: true }}
+                  id="date-picker-dialog-register"
+                  label="End Date"
+                  value={new Date(getValues("endDate"))}
+                  onChange={(e) => handleDateChange(e, 'endDate')}
+                  renderInput={(params) => (
+                    <TextField className="my-2" fullWidth {...params} />
+                  )}
                 />
               </LocalizationProvider>
-              {quiz?.selectedQuiz?.length === 0 ? (
+              <TextField
+                fullWidth
+                variant="outlined"
+                InputProps={{ inputProps: { min: 1 } }}
+                margin="dense"
+                type='number'
+                label="number of Submissions of a user"
+                {...register("countSubmission", {
+                  required: true, min:
+                    { value: 1, message: 'min number of submission is 1' }
+                })}
+                InputLabelProps={{ shrink: true }}
+                error={!!errors?.countSubmission}
+                helperText={errors?.countSubmission?.message}
+              />
+              <TextField
+                fullWidth
+                variant="outlined"
+                InputLabelProps={{ shrink: true }}
+                InputProps={{ inputProps: { min: 15, max: 120 } }}
+                margin="dense"
+                type='number'
+                label="Duration (Minutes)"
+                {...register("duration", {
+                  required: "required",
+                  max: { value: 120, message: "Max duraion is 120 minutes" },
+                  min: { value: 5, message: "Min duraion is 5 minutes" },
+                })}
+                error={!!errors?.duration}
+                helperText={errors?.duration?.message}
+              />
+              {!quiz?.selectedQuiz ? (
                 <LoadingButton
                   onClick={handleSubmit(createQuiz)}
                   variant="contained"

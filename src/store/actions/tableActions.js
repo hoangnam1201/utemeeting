@@ -1,6 +1,8 @@
 import {
   createTableAPI,
+  createTablesAPI,
   deleteTableAPI,
+  deleteTablesAPI,
   getTablesByRoomAndFloorAPI,
   updateTableAPI,
 } from "../../api/table.api";
@@ -48,7 +50,6 @@ const tableSelectFloor = (floor) => {
 export const tableSelectTableAction = (id) => {
   return (dispatch, getState) => {
     const tableState = getState().tables;
-    console.log(tableState);
     let selectedTables = [];
     const index = tableState.selectedTables.indexOf(id);
 
@@ -101,6 +102,19 @@ export const addTableAction = (table) => {
   };
 };
 
+export const addTablesAction = (tables, roomId, floorId, callback) => {
+  return async (dispatch) => {
+    dispatch(tableRequest());
+    try {
+      await createTablesAPI(tables);
+      callback && callback()
+      dispatch(getTabelsAction(roomId, floorId));
+    } catch (err) {
+      dispatch(tableError(err.response?.data?.err));
+    }
+  };
+}
+
 export const updateTableAction = (data, roomId) => {
   return async (dispatch, getState) => {
     dispatch(tableRequest());
@@ -120,6 +134,19 @@ export const removeTableAction = (id, roomId) => {
     try {
       await deleteTableAPI(id);
       dispatch(getTabelsAction(roomId, getState().tables.currentFloor));
+    } catch (err) {
+      dispatch(tableError(err.response?.data?.err));
+    }
+  };
+};
+
+export const removeSeletedTablesAction = (roomId) => {
+  return async (dispatch, getState) => {
+    dispatch(tableRequest());
+    try {
+      const tableState = getState().tables;
+      await deleteTablesAPI(tableState.selectedTables);
+      dispatch(getTabelsAction(roomId, tableState.currentFloor));
     } catch (err) {
       dispatch(tableError(err.response?.data?.err));
     }

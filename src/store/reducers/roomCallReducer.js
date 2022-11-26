@@ -4,11 +4,14 @@ import {
   ROOMCALL_SETSOCKET,
   ROOMCALL_SETROOMINFO,
   ROOMCALL_ADDREQUEST,
-  ROOMCALL_REMOVEREQUEST,
   ROOMCALL_SETPEERID,
   ROOMCALL_JOINLOADING,
   ROOMCALL_SETSELETEDTABLE,
   ROOMCALL_CHATLOADING,
+  ROOMCALL_SETREQUESTLOADING,
+  ROOMCALL_SETREQUEST,
+  ROOMCALL_SHOWQUIZS,
+  ROOMCALL_SETSHARING,
 } from "../actions/roomCallAction";
 
 const initState = {
@@ -20,7 +23,7 @@ const initState = {
   roomInfo: null,
   showChat: false,
   showLobby: false,
-  requests: {},
+  showQuizs: false,
   buzz: null,
   //seleted
   selectedTable: null,
@@ -28,26 +31,29 @@ const initState = {
   loading: false,
   chatLoading: false,
   joinLoading: false,
+  //requests
+  requests: [],
+  requestLoading: false,
+  //share
+  sharing: false,
 };
 
 export const roomCallReducer = (state = initState, { type, payload }) => {
   switch (type) {
-    case ROOMCALL_ADDREQUEST:
-      state.requests[payload.user._id] = payload;
-      return { ...state, requests: { ...state.requests } };
-    case ROOMCALL_REMOVEREQUEST:
-      delete state.requests[payload];
-      return { ...state, requests: { ...state.requests } };
     case ROOMCALL_SETSOCKET:
       return { ...state, socket: payload };
     case ROOMCALL_SETROOMINFO:
       return { ...state, roomInfo: payload };
     case ROOMCALL_SHOWCHAT:
       return { ...state, showChat: payload };
+    case ROOMCALL_SHOWQUIZS:
+      return { ...state, showQuizs: payload };
     case ROOMCALL_SETPEERID:
       return { ...state, myId: payload };
     case ROOMCALL_SHOWLOBBY:
       return { ...state, showLobby: payload };
+    case ROOMCALL_SETSHARING:
+      return { ...state, sharing: payload };
     case ROOMCALL_JOINLOADING:
       const selectedTable = payload ? state.selectedTable : null;
       return { ...state, joinLoading: payload, selectedTable }
@@ -55,6 +61,12 @@ export const roomCallReducer = (state = initState, { type, payload }) => {
       return { ...state, chatLoading: payload }
     case ROOMCALL_SETSELETEDTABLE:
       return { ...state, selectedTable: payload }
+    case ROOMCALL_SETREQUESTLOADING:
+      return { ...state, requestLoading: payload }
+    case ROOMCALL_SETREQUEST:
+      return { ...state, requestLoading: false, requests: payload }
+    case ROOMCALL_ADDREQUEST:
+      return { ...state, requests: [...state.requests, payload] };
     default:
       return state;
   }

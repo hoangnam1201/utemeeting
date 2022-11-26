@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import 'react-toastify/dist/ReactToastify.css';
+import { useSelector } from "react-redux";
 import VideoTableContainer from "../videoTableContainer";
 import ChatBox from "../chatBox";
 import Connection from "../../../services/connection";
@@ -9,10 +10,9 @@ import Toolbar from "../toolbar";
 import PinVideo from "./pinVideo";
 import ListFloor from "./listFloor";
 import ListTable from "./listTable";
-import { roomShowLobbyAction } from "../../../store/actions/roomCallAction";
+import ListQuiz from "./listQuiz";
 
 const RoomDetail = ({
-  connection,
   roomTables,
   roomMessages,
   tableMessages,
@@ -24,7 +24,7 @@ const RoomDetail = ({
   currentFloor,
 }) => {
   const roomCall = useSelector((state) => state.roomCall);
-  const dispatch = useDispatch();
+  const selectedVideo = useSelector((state) => state.selectedVideo)
   const [mediaStatus, setMediaStatus] = useState({
     audio: false,
     video: false,
@@ -33,7 +33,7 @@ const RoomDetail = ({
   useEffect(() => {
     const media = Connection.getMediaStatus(myStream.stream);
     setMediaStatus(media);
-    connection.current.replaceStream();
+    Connection.replaceStream();
     roomCall.socket.emit(
       "change-media",
       media,
@@ -43,7 +43,6 @@ const RoomDetail = ({
 
   return (
     <div
-      onClick={() => dispatch(roomShowLobbyAction(false))}
       className="min-h-screen relative bg-blue-50 pb-20"
     >
       {!roomCall?.roomInfo?.isPresent && (
@@ -52,9 +51,12 @@ const RoomDetail = ({
             className="sticky z-10 justify-center w-full overflow-x-auto top-4 scroll-none"
             streamDatas={streamDatas}
             myStream={myStream}
-            connection={connection}
           />
-          <PinVideo />
+          {selectedVideo && (
+            (Connection?.myID === selectedVideo) ? <PinVideo streamData={myStream} /> :
+              (Connection?.sharePeerId === selectedVideo) ? (<PinVideo streamData={{ stream: Connection?.shareStream, media: { video: true, audio: false } }} />) :
+                selectedVideo ? <PinVideo streamData={streamDatas[selectedVideo]} /> : null
+          )}
         </>
       )}
       <div className="text-xl font-semibold py-4 text-gray-500">
@@ -66,7 +68,6 @@ const RoomDetail = ({
       </div>
       {roomCall?.showChat && (
         <ChatBox
-          connection={connection}
           roomMessages={roomMessages}
           tableMessages={tableMessages}
           style={{ left: "98%", top: "100%" }}
@@ -77,10 +78,10 @@ const RoomDetail = ({
         userJoined={userJoined}
         roomInfo={roomInfo}
       />
+      <ListQuiz />
       <div className=" fixed z-30 top-full transform -translate-y-full w-max left-1/2 -translate-x-1/2">
         <Toolbar
           className="bg-white rounded-lg shadow-inner"
-          connection={connection}
           mediaStatus={mediaStatus}
           userJoined={userJoined}
         />
@@ -88,7 +89,6 @@ const RoomDetail = ({
       <Present
         mediaStatus={mediaStatus}
         open={roomCall?.roomInfo?.isPresent}
-        connection={connection}
         streamDatas={streamDatas}
         roomMessages={roomMessages}
         myStream={myStream}

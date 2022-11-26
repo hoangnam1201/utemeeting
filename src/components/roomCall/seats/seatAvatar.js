@@ -1,4 +1,4 @@
-import { Popover } from "@mui/material";
+import { Badge, Popover } from "@mui/material";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import Avatar from "react-avatar";
@@ -41,15 +41,21 @@ const SeatAvatar = React.memo(({ user, ...rest }) => {
 
   return (
     <div className="absolute flex items-center" {...rest}>
-      {user &&
-        (user?.picture ? (
+      {/* {user?._id === roomCallState?.roomInfo?.owner?._id && (
+        <StarIcon
+          fontSize="medium"
+          className="absolute text-yellow-800 top-0 right-0 transform -translate-y-3"
+        />
+      )} */}
+      {user && <Badge badgeContent={
+        user?._id === userSate?.user?._id ? 'you' :
+          user?._id === roomCallState?.roomInfo?.owner?._id ? 'host' :
+            0} color={
+              user?._id === userSate?.user?._id ?
+                'secondary' : 'primary'
+            }>
+        {user?.picture ? (
           <div>
-            {userSate?.user?._id === roomCallState?.roomInfo?.owner?._id && (
-              <StarIcon
-                fontSize="medium"
-                className="absolute text-yellow-800 top-0 right-0 transform -translate-y-3"
-              />
-            )}
             <button onClick={clickHandler} className="outline-none">
               <img
                 className="rounded-full shadow-lg"
@@ -65,7 +71,7 @@ const SeatAvatar = React.memo(({ user, ...rest }) => {
           <div>
             <button onClick={clickHandler} className="outline-none">
               <Avatar
-                onClick={() => {}}
+                onClick={() => { }}
                 name={user?.name}
                 size="50"
                 round={true}
@@ -73,7 +79,8 @@ const SeatAvatar = React.memo(({ user, ...rest }) => {
               />
             </button>
           </div>
-        ))}
+        )}
+      </Badge>}
       {open && (
         <>
           <div
@@ -108,7 +115,7 @@ const SeatAvatar = React.memo(({ user, ...rest }) => {
           </div>
         </>
       )}
-    </div>
+    </div >
   );
 });
 

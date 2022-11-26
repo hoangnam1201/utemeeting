@@ -1,4 +1,5 @@
-import instance from "./instanceAxios";
+import axios from "axios";
+import instance, { baseURL } from "./instanceAxios";
 
 export const getInvitedRoomAPI = () => {
   return instance.get("/room/invited-room");
@@ -52,4 +53,22 @@ export const removeMemberAPI = (roomId, userId) => {
   return instance.delete("/room/members/remove-member/" + roomId, {
     params: { userId },
   });
+};
+
+export const getAllRoomAPI = (pageSize, pageIndex, ownerId) => {
+  return instance.get("/room", {
+    params: { take: pageSize, page: pageIndex, ownerId: ownerId },
+  });
+};
+
+export const banRoomAPI = (id) => {
+  return instance.put("/room/ban-room/" + id);
+};
+
+export const unbanRoomAPI = (id) => {
+  return instance.put("/room/unban-room/" + id);
+};
+
+export const downloadJoinersAPI = (id) => {
+  return fetch(baseURL + "room/joiners/download/" + id, { method: 'GET' });
 };

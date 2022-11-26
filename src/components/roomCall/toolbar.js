@@ -12,12 +12,14 @@ import LogoutSharpIcon from "@mui/icons-material/LogoutSharp";
 import DoorBackIcon from "@mui/icons-material/DoorBack";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EventSeatIcon from "@mui/icons-material/EventSeat";
+import QuizIcon from '@mui/icons-material/Quiz';
 import { useDispatch, useSelector } from "react-redux";
 import {
   roomCallCloseRoomAction,
   roomCallJoinTable,
   roomShowChatAction,
   roomShowLobbyAction,
+  roomShowQuizsAction,
   setSeletedTable,
 } from "../../store/actions/roomCallAction";
 import { sendMessageAction } from "../../store/actions/messageAction";
@@ -25,9 +27,10 @@ import { confirmPresent, confirmSwal } from "../../services/swalServier";
 import { Link, useHistory } from "react-router-dom";
 import PeopleIcon from "@mui/icons-material/People";
 import { useReactMediaRecorder } from "react-media-recorder";
-import { LinearProgress } from "@mui/material";
+import { LinearProgress, Switch } from "@mui/material";
+import Connection from "../../services/connection";
 
-const Toolbar = ({ connection, mediaStatus, userJoined, ...rest }) => {
+const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
   const roomCall = useSelector((state) => state.roomCall);
   const currentUser = useSelector((state) => state.userReducer);
   const dispatch = useDispatch();
@@ -69,23 +72,23 @@ const Toolbar = ({ connection, mediaStatus, userJoined, ...rest }) => {
     startRecording();
   };
   const turnOffAudio = () => {
-    connection.current.turnOffAudio();
+    Connection.turnOffAudio();
   };
 
   const turnOnAudio = () => {
-    connection.current.turnOnAudio();
+    Connection.turnOnAudio();
   };
 
   const turnOffVideo = () => {
-    connection.current.turnOffVideo();
+    Connection.turnOffVideo();
   };
 
   const turnOnVideo = () => {
-    connection.current.turnOnVideo();
+    Connection.turnOnVideo();
   };
 
   const shareScreen = async () => {
-    connection.current.getDisplayMediaStream();
+    Connection.shareScreen('table');
   };
 
   const onPresent = () => {
@@ -96,15 +99,14 @@ const Toolbar = ({ connection, mediaStatus, userJoined, ...rest }) => {
 
   const joinTableHandler = () => {
     if (roomCall && roomCall.selectedTable && !roomCall.joinLoading) {
-      connection.current.clearTableMessages();
-      connection.current.clearPeers();
+      Connection.clearTableMessages();
+      Connection.clearPeers();
       dispatch(roomCallJoinTable(roomCall.selectedTable, mediaStatus));
     }
   };
   const cancelSeleted = () => {
     if (!roomCall.joinLoading) dispatch(setSeletedTable(null));
   };
-
 
   return (
     <div {...rest}>
@@ -216,7 +218,6 @@ const Toolbar = ({ connection, mediaStatus, userJoined, ...rest }) => {
             {mediaStatus.video ? (
               <IconButton
                 onClick={turnOffVideo}
-                disabled={connection.current.isShare}
               >
                 <PhotoCameraFrontIcon
                   className="text-blue-500"
@@ -231,7 +232,7 @@ const Toolbar = ({ connection, mediaStatus, userJoined, ...rest }) => {
             <IconButton onClick={shareScreen}>
               <ScreenShareIcon
                 fontSize="large"
-                className={`${connection.current.isShare && "text-blue-500"}`}
+                className={`${roomCall.sharing && "text-blue-500"}`}
               />
             </IconButton>
             <IconButton
@@ -242,35 +243,30 @@ const Toolbar = ({ connection, mediaStatus, userJoined, ...rest }) => {
             >
               {stateMessage && !roomCall.showChat ? (
                 <Badge color="primary" variant="dot">
-                  <ChatIcon fontSize="large" />
+                  <ChatIcon fontSize="large" className={roomCall.showChat ? 'text-blue-500' : ''} />
                 </Badge>
               ) : (
-                <ChatIcon fontSize="large" />
+                <ChatIcon fontSize="large" className={roomCall.showChat ? 'text-blue-500' : ''} />
               )}
             </IconButton>
-            {roomCall?.showLobby ? (
-              <IconButton
-                onClick={(e) => {
-                  dispatch(roomShowLobbyAction(false));
-                  e.stopPropagation();
-                }}
-              >
-                <PeopleIcon className="text-blue-500" fontSize="large" />
-              </IconButton>
-            ) : (
-              <IconButton
-                onClick={(e) => {
-                  dispatch(roomShowLobbyAction(true));
-                  e.stopPropagation();
-                }}
-              >
-                <PeopleIcon fontSize="large" />
-              </IconButton>
-            )}
+            <IconButton
+              onClick={(e) => {
+                dispatch(roomShowLobbyAction(true));
+                e.stopPropagation();
+              }}
+            >
+              <PeopleIcon fontSize="large" />
+            </IconButton>
+            <IconButton
+              onClick={() => {
+                dispatch(roomShowQuizsAction(true))
+              }}>
+              <QuizIcon fontSize="large" />
+            </IconButton>
             <div className="border-l-2 border-gray-400 px-3 flex items-end">
               <button
                 className="p-2 text-gray-500 focus:outline-none text-sm font-semibold"
-                onClick={() => connection.current.leaveTable()}
+                onClick={() => Connection.leaveTable()}
               >
                 <div>
                   <EventSeatIcon className="text-gray-500" />
@@ -308,20 +304,16 @@ const Toolbar = ({ connection, mediaStatus, userJoined, ...rest }) => {
                 </button>
               )}
               <div className="p-2 text-gray-500 focus:outline-none text-sm font-semibold">
-                <label>
-                  <input
-                    type="checkbox"
-                    value={autoHidden}
-                    onChange={() => setAutoHidden(!autoHidden)}
-                  />
-                  <p>auto hiden</p>
+                <label onClick={() => setAutoHidden(!autoHidden)}>
+                  <Switch value={autoHidden} />
+                  <p>auto hide</p>
                 </label>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
