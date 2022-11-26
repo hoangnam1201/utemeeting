@@ -710,7 +710,7 @@ class Connection {
       return;
     }
     try {
-      this.shareStream = await this.getDisplayMediaStream();
+      // this.shareStream = await this.getDisplayMediaStream();
       this.sharePeer = initializePeerConnection()
 
       this.sharePeer.once('open', (id) => {
@@ -759,7 +759,7 @@ class Connection {
   }
 
   static async getDisplayMediaStream() {
-    return navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+    // return navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
   };
 
   static async turnOffAudio() {
