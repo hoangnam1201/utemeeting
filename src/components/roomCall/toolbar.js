@@ -26,9 +26,26 @@ import { sendMessageAction } from "../../store/actions/messageAction";
 import { confirmPresent, confirmSwal } from "../../services/swalServier";
 import { Link, useHistory } from "react-router-dom";
 import PeopleIcon from "@mui/icons-material/People";
-// import { useReactMediaRecorder } from "react-media-recorder";
+import { useReactMediaRecorder } from "react-media-recorder";
 import { LinearProgress, Switch } from "@mui/material";
 import Connection from "../../services/connection";
+
+const InitRecorderState = (downloadRecord) => {
+  try {
+    const mediaRecorder = useReactMediaRecorder({
+      screen: true,
+      audio: true,
+      blobPropertyBag: { type: 'video/mp4' },
+      onStop: (bloburl, blob) => {
+        downloadRecord(bloburl, blob)
+      },
+    });
+    return mediaRecorder;
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 
 const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
   const roomCall = useSelector((state) => state.roomCall);
@@ -36,19 +53,14 @@ const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const [autoHidden, setAutoHidden] = useState(false);
-  // const { status, startRecording, stopRecording, clearBlobUrl } = useReactMediaRecorder({
-  //   screen: true,
-  //   audio: true,
-  //   blobPropertyBag: { type: 'video/mp4' },
-  //   onStop: (bloburl, blob) => {
-  //     downloadRecord(bloburl, blob)
-  //   },
-  // });
+  const { status, startRecording, stopRecording, clearBlobUrl } = InitRecorderState((bloburl, blob) => {
+    downloadRecord(bloburl, blob)
+  })
 
   useEffect(() => {
     return () => {
-      // stopRecording();
-      // clearBlobUrl();
+      stopRecording();
+      clearBlobUrl();
     }
   }, [])
 
@@ -69,7 +81,7 @@ const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
   };
 
   const turnOnRecord = () => {
-    // startRecording();
+    startRecording();
   };
   const turnOffAudio = () => {
     Connection.turnOffAudio();
@@ -162,7 +174,7 @@ const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
                     divide into tables
                   </button>
 
-                  {/* {status !== "recording" ? (
+                  {status !== "recording" ? (
                     <button
                       className="p-2 text-gray-500 focus:outline-none text-sm font-semibold capitalize hover:bg-gray-200 whitespace-nowrap"
                       onClick={turnOnRecord}
@@ -172,11 +184,11 @@ const Toolbar = ({ mediaStatus, userJoined, ...rest }) => {
                   ) : (
                     <button
                       className="p-2 text-gray-500 focus:outline-none text-sm font-semibold capitalize hover:bg-gray-200 whitespace-nowrap"
-                      // onClick={stopRecording}
+                      onClick={stopRecording}
                     >
                       Stop recording
                     </button>
-                  )} */}
+                  )}
 
                   <Link
                     to={`/user/management-groups/${roomCall?.roomInfo._id}`}
