@@ -25,6 +25,7 @@ import {
   getRoomAPI,
   increaseFloorAPI,
   removeMemberAPI,
+  removeMembersAPI,
 } from "../../api/room.api";
 import { setGlobalNotification } from "../../store/reducers/globalNotificationReducer";
 import { AboutFormatSwal, confirmSwal } from "../../services/swalServier";
@@ -38,7 +39,6 @@ function UpdateEvent() {
   const { id } = useParams();
   const tables = useSelector((state) => state.tables);
   //quiz
-  const quiz = useSelector((state) => state.quizReducer);
   const dispatch = useDispatch();
   const [room, setRoom] = useState(null);
   const [notFound, setNotFound] = useState(false);
@@ -55,11 +55,12 @@ function UpdateEvent() {
     handleSubmit,
     formState: { errors },
     reset,
-    getValues,
     setValue,
+    watch
   } = useForm({
     mode: "onChange",
   });
+  const wfloor = watch('floor')
 
   useEffect(() => {
     getRoom("START", "ALL");
@@ -130,7 +131,7 @@ function UpdateEvent() {
         await deleteFloorAPI(room._id, tables.currentFloor);
         await getRoom("START", "UPDATE_FLOORS");
       });
-      toastSuccess('deleted successfully');
+      toastSuccess('deleted successfull');
     } catch (err) {
       console.log(err);
     }
@@ -142,6 +143,7 @@ function UpdateEvent() {
       await increaseFloorAPI(room._id, tables.currentFloor);
       await getRoom("END", "UPDATE_FLOORS");
     } catch (err) {
+      setFloorsLoading(false);
       console.log(err);
     }
   };
@@ -157,6 +159,7 @@ function UpdateEvent() {
   };
 
   const onSelectChange = (e) => {
+    console.log(e)
     setUsersSelected(e);
   };
 
@@ -165,10 +168,12 @@ function UpdateEvent() {
     try {
       const userIds = usersSelected.map((s) => s.value);
       await addMembersAPI(id, userIds);
-      setUsersSelected(null);
-      toastSuccess('added members successfully');
+      setUsersSelected([]);
+      toastSuccess('added members successfull');
       await getRoom(null, "UPDATE_MEMBERS");
     } catch (err) {
+      setMembersLoading(false);
+      setUsersSelected([]);
       console.log(err);
     }
   };
@@ -182,13 +187,39 @@ function UpdateEvent() {
       fd.append("importFile", files[0]);
       setMembersLoading(true);
       await addMembersByFileAPI(id, fd);
-      toastSuccess('successfully');
+      toastSuccess('successfull');
       await getRoom(null, "UPDATE_MEMBERS");
       e.target.value = null;
     } catch (e) {
       toastError(e.response?.data?.msg)
+      setMembersLoading(false);
     }
   };
+
+  const removeMembers = async () => {
+    try {
+      setMembersLoading(true);
+      const data = usersSelected.map(u => u.value);
+      await removeMembersAPI(id, data);
+      toastSuccess('successfull');
+      setUsersSelected([]);
+      await getRoom(null, "UPDATE_MEMBERS");
+    } catch (e) {
+      setMembersLoading(false);
+      setUsersSelected([]);
+      toastError(e?.response?.data?.msg)
+    }
+  }
+
+  const onSeletectUser = (user) => {
+    const index = usersSelected.findIndex(u => u.value === user._id);
+    if (index === -1) {
+      setUsersSelected([...usersSelected, { label: `${user.name} (${user.email})`, value: user._id }])
+      return;
+    }
+    usersSelected.splice(index, 1)
+    setUsersSelected([...usersSelected])
+  }
 
   const onRemoveMember = async (userId) => {
     try {
@@ -202,11 +233,13 @@ function UpdateEvent() {
       });
       if (!isConfirmed) return;
       setMembersLoading(true);
-      toastSuccess('successfully');
+      toastSuccess('successfull');
+      setUsersSelected([]);
       await removeMemberAPI(id, userId);
       await getRoom(null, "UPDATE_MEMBERS");
     } catch (e) {
       toastError(e.response?.data?.msg)
+      setUsersSelected([]);
       console.log(e);
     }
   };
@@ -244,7 +277,7 @@ function UpdateEvent() {
             </p>
           </div>
           <div className=" bg-gray-100 py-2 rounded-sm tracking-widest text-left px-3 text-gray-500 flex justify-between">
-            <p>{`${window.location.origin.toString()}/room/${id}`}</p>
+            <p className="break-all">{`${window.location.origin.toString()}/room/${id}`}</p>
             <button
               onClick={() => {
                 navigator.clipboard.writeText(
@@ -261,7 +294,7 @@ function UpdateEvent() {
         <div className="grid grid-cols-3 shadow-md p-4 mt-4">
           <div className="text-md col-span-3 text-left">
             <div className="h-2">{tables?.loading && <LinearProgress />}</div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-col md:flex-row">
               <div>
                 <p className=" font-semibold text-md">Tables</p>
                 <p className="text-gray-400 font-thin text-sm">
@@ -269,7 +302,7 @@ function UpdateEvent() {
                   divide the group
                 </p>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-col md:flex-row">
                 <Button
                   className=" min-w-max"
                   variant="outlined"
@@ -289,7 +322,7 @@ function UpdateEvent() {
             </div>
           </div>
           <div
-            className="flex flex-col col-span-2 p-4"
+            className="flex flex-col col-span-3 md:col-span-2 p-4"
             style={{ height: "700px" }}
           >
             <div className="grid grid-cols-3 px-4 py-1 bg-gray-200 rounded-md relative">
@@ -388,7 +421,7 @@ function UpdateEvent() {
               </div>
             </div>
           </div>
-          <div className="p-4">
+          <div className="p-4 col-span-3 md:col-span-1">
             <div className="text-left text-md text-gray-500 font-semibold">
               Table
             </div>
@@ -437,12 +470,11 @@ function UpdateEvent() {
               {!!tables?.selectedTables.length && (
                 <div className="flex flex-wrap gap-2">
                   {room?.floors?.map((f, index) => {
-                    const vFloor = getValues("floor");
                     return (
                       <button
                         type="button"
                         key={index}
-                        className={`shadow-md p-1 whitespace-nowrap rounded text-sm font-thin text-gray-500 snap-start scroll-ml-4 ${vFloor === f && "shadow-lg bg-gray-200"
+                        className={`shadow-md p-1 whitespace-nowrap rounded text-sm font-thin text-gray-500 snap-start scroll-ml-4 ${wfloor === f && "shadow-lg bg-gray-200"
                           }`}
                         onClick={() =>
                           setValue("floor", f, {
@@ -516,7 +548,7 @@ function UpdateEvent() {
         </div>
 
         <div className="grid grid-cols-3 mt-4 border-b-2">
-          <div className="flex justify-between col-span-3 p-4">
+          <div className="block md:flex md:justify-between col-span-3 p-4">
             <div className="text-xl font-semibold text-left">
               <p className=" font-semibold text-md"> Members </p>
               <p className="text-gray-400 font-thin text-sm">
@@ -527,13 +559,13 @@ function UpdateEvent() {
                 google account at least once
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="block md:flex mt-2 gap-2">
               <Link to={`/user/management-member/${id}`}>
                 <Button variant="contained" color="primary">
                   Add more member
                 </Button>
               </Link>
-              <div>
+              <div className="mt-2 md:mt-0">
                 <Button variant="outlined">
                   <label>
                     Import by xlsx file
@@ -570,7 +602,7 @@ function UpdateEvent() {
             </div>
           </div>
           <div
-            className="flex flex-col col-span-2 p-4 shadow-md"
+            className="flex flex-col col-span-3 md:col-span-2 p-4 shadow-md"
             style={{ height: "700px" }}
           >
             <div className="grid grid-cols-2 px-4 py-2 bg-gray-200 rounded-md">
@@ -582,8 +614,11 @@ function UpdateEvent() {
                 room.members.map((u, index) => {
                   return (
                     <div
-                      className="grid grid-cols-2 px-4 py-2 bg-gray-100 rounded-md mt-4 text-sm text-gray-500"
+                      className={`grid grid-cols-2 px-4 py-2 rounded-md mt-4 text-sm text-gray-500 ${usersSelected.find(user => user.value === u._id) ? 'bg-gray-300' : 'bg-gray-100'}`}
                       key={index}
+                      onClick={() => {
+                        onSeletectUser(u)
+                      }}
                     >
                       <div className="text-left border-r-2 border-gray-300">
                         {u.name}
@@ -599,7 +634,7 @@ function UpdateEvent() {
                 })}
             </div>
           </div>
-          <div className="p-4">
+          <div className="p-4 col-span-3 md:col-span-1">
             <div className="text-left text-md text-gray-500 font-semibold">
               user
             </div>
@@ -620,8 +655,18 @@ function UpdateEvent() {
                 variant="contained"
                 onClick={onAddMember}
                 loading={membersLoading}
+                disabled={!usersSelected.length}
               >
                 Add
+              </LoadingButton>
+              <LoadingButton
+                variant="contained"
+                color="inherit"
+                onClick={removeMembers}
+                loading={membersLoading}
+                disabled={!usersSelected.length}
+              >
+                Remove
               </LoadingButton>
             </div>
           </div>

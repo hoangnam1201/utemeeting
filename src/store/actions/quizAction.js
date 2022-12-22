@@ -57,6 +57,14 @@ export const selectQuizAction = (id, callback) => {
     }
   };
 };
+
+export const clearSelectQuizAction = ()=>{
+  return (dispatch, getState) => {
+    const quizState = getState().quizReducer;
+    if (quizState.selectedQuiz.length) return dispatch(quizSelected([]))
+  };
+}
+
 export const getQuizAction = (roomId) => {
   return async (dispatch) => {
     dispatch(quizRequest());
@@ -97,7 +105,7 @@ export const addQuizAction = (data, roomId, callback) => {
     try {
       await createQuizApi(data);
       dispatch(getQuizAction(roomId));
-      toastSuccess('successfully')
+      toastSuccess('successfull')
       if (callback) {
         callback();
       }
@@ -118,7 +126,8 @@ export const updateQuizActon = (id, data, callback) => {
     try {
       await updateQuizApi(id, data);
       dispatch(getQuizAction(data.room));
-      toastSuccess('successfully')
+      dispatch(clearSelectQuizAction())
+      toastSuccess('successfull')
       if (callback) {
         callback();
       }
@@ -139,7 +148,7 @@ export const deleteQuizAction = (id, roomId) => {
     try {
       await deleteQuizApi(id);
       dispatch(getQuizAction(roomId));
-      toastSuccess('successfully')
+      toastSuccess('successfull')
     } catch (err) {
       console.log(err);
       if (err.response) {

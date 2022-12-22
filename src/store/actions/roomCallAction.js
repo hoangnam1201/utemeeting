@@ -1,12 +1,10 @@
 import Connection from "../../services/connection";
-
 export const ROOMCALL_SETACCESSMEDIA = "ROOMCALL_SETACCESSMEDIA";
 export const ROOMCALL_SHOWCHAT = "ROOMCALL_SHOWCHAT";
 export const ROOMCALL_SHOWLOBBY = "ROOMCALL_SHOWLOBBY";
 export const ROOMCALL_CHANGE = "ROOMCALL_CANACCESS";
 export const ROOMCALL_SETSOCKET = "ROOMCALL_SETSOCKET";
 export const ROOMCALL_SETPEERID = "ROOMCALL_SETPEERID";
-export const ROOMCALL_SETSHARING = "ROOMCALL_SETSHARING";
 export const ROOMCALL_SETROOMINFO = "ROOMCALL_SETROOMINFO";
 export const ROOMCALL_ADDREQUEST = "ROOMCALL_ADDREQUEST";
 export const ROOMCALL_JOINLOADING = 'ROOMCALL_JOINLOADING';
@@ -15,18 +13,12 @@ export const ROOMCALL_SETSELETEDTABLE = 'ROOMCALL_SETSELETEDTABLE';
 export const ROOMCALL_SETREQUESTLOADING = 'ROOMCALL_SETREQUESTLOADING';
 export const ROOMCALL_SETREQUEST = 'ROOMCALL_SETREQUEST';
 export const ROOMCALL_SHOWQUIZS = 'ROOMCALL_SHOWQUIZLIST';
+export const ROOMCALL_SETSELETEDUSERINFO = 'ROOMCALL_SETSELETEDUSERINFO';
 
 const setRequestLoading = (isloading) => {
   return {
     type: ROOMCALL_SETREQUESTLOADING,
     payload: isloading
-  }
-}
-
-export const roomCallSetSharingAction = (isShare) => {
-  return {
-    type: ROOMCALL_SETSHARING,
-    payload: isShare
   }
 }
 
@@ -100,12 +92,20 @@ export const setSeletedTable = (id) => {
   }
 }
 
+export const roomCallSetSeletedUserInfo = (id) => {
+  return {
+    type: ROOMCALL_SETSELETEDUSERINFO,
+    payload: id
+  }
+}
+
 export const roomCallSetJoinLoading = (isloading) => {
   return {
     type: ROOMCALL_JOINLOADING,
     payload: isloading
   }
 }
+
 
 export const roomCallSetChatLoading = (isloading) => {
   return {
@@ -114,15 +114,18 @@ export const roomCallSetChatLoading = (isloading) => {
   }
 }
 
+
+
 export const roomCallJoinTable = (id, mediaStatus) => {
   return (dispatch, getState) => {
-    const roomCall = getState().roomCall;
+    const callAll = getState().callAllReducer;
     dispatch(roomCallSetJoinLoading(true))
-    Connection.stopShareTrack()
-    roomCall.socket.emit(
+    if (!callAll.isCallAll)
+      Connection.stopShareTrack()
+    Connection.socket.emit(
       "table:join",
       { tableId: id },
-      roomCall.myId,
+      Connection.myID,
       mediaStatus,
       () => {
         dispatch(roomCallSetJoinLoading(false))

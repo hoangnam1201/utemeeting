@@ -2,7 +2,7 @@ import React from "react";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Avatar from "react-avatar";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { kickComfirmSwal, SendBuzzSwal } from "../../services/swalServier";
 import {
   ListItemText,
@@ -19,15 +19,19 @@ import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import { downloadJoinersAPI } from "../../api/room.api";
 import { useParams } from "react-router-dom";
 import { toastError } from "../../services/toastService";
+import { roomCallSetSeletedUserInfo } from "../../store/actions/roomCallAction";
 
 const JoinerList = ({ joiners }) => {
   const { id } = useParams();
+
   const dowload = async () => {
     try {
       const res = await downloadJoinersAPI(id);
-      const blob = await res.blob();
       const url = window.URL.createObjectURL(
-        new Blob([blob])
+        new Blob([res], {
+          type:
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        })
       );
       const link = document.createElement('a');
       link.href = url;
@@ -70,8 +74,10 @@ const JoinerItem = ({ joiner }) => {
   const [anchorEl, setAnchorEl] = useState(false);
   const roomCallState = useSelector((state) => state.roomCall);
   const userSate = useSelector((state) => state.userReducer);
+  const dispatch = useDispatch();
 
   const KickHandler = (id) => {
+    setAnchorEl(null);
     kickComfirmSwal((value) => {
       roomCallState?.socket.emit("room:kick", id, !!value);
     });
@@ -83,6 +89,7 @@ const JoinerItem = ({ joiner }) => {
       roomCallState?.socket.emit("room:buzz", id, value);
     });
   };
+
   return (
     <>
       <ListItem secondaryAction={
@@ -128,7 +135,11 @@ const JoinerItem = ({ joiner }) => {
                   </>
                 )}
               <ListItem disablePadding>
-                <ListItemButton style={{ padding: '0 1rem' }}>
+                <ListItemButton style={{ padding: '0 1rem' }}
+                  onClick={() => {
+                    dispatch(roomCallSetSeletedUserInfo(joiner?._id))
+                    setAnchorEl(null)
+                  }}>
                   <ListItemIcon>
                     <InfoIcon />
                   </ListItemIcon>

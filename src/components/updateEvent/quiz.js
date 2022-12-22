@@ -29,8 +29,8 @@ const QuizManage = (props) => {
     handleSubmit,
     formState: { errors },
     reset,
-    getValues,
     setValue,
+    watch
   } = useForm({
     mode: "onChange",
     defaultValues: {
@@ -38,6 +38,7 @@ const QuizManage = (props) => {
       endDate: new Date().getTime()
     },
   });
+  const date = watch(['startDate', 'endDate'])
 
   useEffect(() => {
     dispatch(getQuizAction(roomId));
@@ -58,7 +59,8 @@ const QuizManage = (props) => {
       reset({
         name: "",
         description: "",
-        duration: "",
+        duration: 5,
+        countSubmission: 1,
         startDate: new Date().getTime(),
         endDate: new Date().getTime(),
       });
@@ -72,7 +74,7 @@ const QuizManage = (props) => {
         reset({
           name: "",
           description: "",
-          duration: "",
+          duration: 5,
           countSubmission: 1,
           startDate: new Date().getTime(),
           endDate: new Date().getTime()
@@ -132,8 +134,8 @@ const QuizManage = (props) => {
         </div>
         <div className="grid grid-cols-3">
           <div
-            className="flex flex-col col-span-2"
-            style={{ height: "5 00px" }}
+            className="flex flex-col col-span-3 md:col-span-2"
+            style={{ height: "500px" }}
           >
             <div className="grid grid-cols-2 px-4 py-2 bg-gray-200 rounded-md">
               <div className="text-left border-r-2 border-gray-500">
@@ -156,7 +158,7 @@ const QuizManage = (props) => {
                       <div className="text-left border-r-2 border-gray-300">
                         {q.name}
                       </div>
-                      <div className="text-left pl-3 flex justify-between">
+                      <div className="text-left pl-3 block md:flex justify-between">
                         {q.duration} minutes
                         <div>
                           <Link
@@ -186,7 +188,7 @@ const QuizManage = (props) => {
               })}
             </div>
           </div>
-          <div className="p-4">
+          <div className="p-4 col-span-3 md:col-span-1">
             <div className="text-left text-md text-gray-500 font-semibold">
               Create quiz
             </div>
@@ -223,7 +225,7 @@ const QuizManage = (props) => {
                   InputLabelProps={{ shrink: true }}
                   id="date-picker-dialog-register"
                   label="Start Date"
-                  value={new Date(getValues("startDate"))}
+                  value={new Date(date[0] || Date.now())}
                   onChange={(e) => handleDateChange(e, 'startDate')}
                   renderInput={(params) => (
                     <TextField className="my-2" fullWidth {...params} />
@@ -237,7 +239,7 @@ const QuizManage = (props) => {
                   InputLabelProps={{ shrink: true }}
                   id="date-picker-dialog-register"
                   label="End Date"
-                  value={new Date(getValues("endDate"))}
+                  value={new Date(date[1] || Date.now())}
                   onChange={(e) => handleDateChange(e, 'endDate')}
                   renderInput={(params) => (
                     <TextField className="my-2" fullWidth {...params} />
