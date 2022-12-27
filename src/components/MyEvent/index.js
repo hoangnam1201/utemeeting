@@ -97,7 +97,6 @@ const MyEvent = () => {
   useEffect(() => {
     dispatch(actGetRoom());
     getInvitedRoom();
-    renewToken()
   }, []);
 
   const getInvitedRoom = async () => {
